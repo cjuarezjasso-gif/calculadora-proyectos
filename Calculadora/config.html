@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proyecto Salcera - Configuración</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* [Mantener todos los estilos anteriores] */
+    
+    /* Estilos adicionales para la sección de sensibilidad */
+    .sensitivity-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .sensitivity-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+    }
+    
+    .sensitivity-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+    
+    .sensitivity-card h4 {
+      margin-top: 0;
+      color: #333;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .sensitivity-card h4 i {
+      margin-right: 10px;
+      font-size: 20px;
+    }
+    
+    .sensitivity-card .value-display {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 10px 0;
+      color: #4CAF50;
+    }
+    
+    .sensitivity-card .slider-container {
+      width: 100%;
+    }
+    
+    .sensitivity-card input[type="range"] {
+      width: 100%;
+      height: 8px;
+      -webkit-appearance: none;
+      background: #e0e0e0;
+      border-radius: 4px;
+      outline: none;
+    }
+    
+    .sensitivity-card input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #4CAF50;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .sensitivity-card input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      background: #45a049;
+    }
+    
+    .sensitivity-card .range-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px;
+      font-size: 12px;
+      color: #777;
+    }
+    
+    .sensitivity-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    
+    .scenario-selector {
+      margin-top: 30px;
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 12px;
+    }
+    
+    .scenario-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .scenario-btn {
+      background: #e0e0e0;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .scenario-btn:hover {
+      background: #d0d0d0;
+    }
+    
+    .scenario-btn.active {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .scenario-btn.optimistic {
+      background: #2196F3;
+      color: white;
+    }
+    
+    .scenario-btn.pessimistic {
+      background: #f44336;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <h2>Proyecto Salcera</h2>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="index.html" class="nav-link"><i>📊</i> Dashboard</a></li>
+        <li class="nav-item"><a href="viabilidad.html" class="nav-link"><i>📈</i> Viabilidad</a></li>
+        <li class="nav-item"><a href="ventas.html" class="nav-link"><i>💰</i> Ventas</a></li>
+        <li class="nav-item"><a href="compras.html" class="nav-link"><i>🛒</i> Compras</a></li>
+        <li class="nav-item"><a href="indicadores.html" class="nav-link"><i>📉</i> Indicadores</a></li>
+        <li class="nav-item"><a href="config.html" class="nav-link active"><i>⚙️</i> Configuración</a></li>
+      </ul>
+    </div>
+    
+    <div class="main-content">
+      <h1 class="section-title">Configuración del Proyecto</h1>
+      
+      <!-- Nueva sección de Factores de Sensibilidad -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            📊 Factores de Sensibilidad
+            <span id="cambios-sensibilidad" class="changes-counter">0 cambios</span>
+          </h3>
+        </div>
+        <div class="card-body">
+          <p>Estos parámetros afectan directamente las proyecciones financieras del proyecto. Ajusta los valores para simular diferentes escenarios.</p>
+          
+          <div class="scenario-selector">
+            <h4>Escenarios Predefinidos</h4>
+            <p>Selecciona un escenario para aplicar valores predeterminados:</p>
+            <div class="scenario-buttons">
+              <button class="scenario-btn active" data-scenario="base">🏠 Escenario Base</button>
+              <button class="scenario-btn optimistic" data-scenario="optimista">🚀 Escenario Optimista</button>
+              <button class="scenario-btn pessimistic" data-scenario="pesimista">⚠️ Escenario Pesimista</button>
+              <button class="scenario-btn" data-scenario="personalizado">✏️ Personalizado</button>
+            </div>
+          </div>
+          
+          <div class="sensitivity-grid">
+            <!-- Incremento anual en la población -->
+            <div class="sensitivity-card">
+              <h4><i>👥</i> Incremento anual en la población</h4>
+              <div class="value-display" id="incremento-poblacion-value">19%</div>
+              <div class="slider-container">
+                <input type="range" id="incremento-poblacion" min="0" max="30" step="0.1" value="19">
+                <div class="range-labels">
+                  <span>0%</span>
+                  <span>15%</span>
+                  <span>30%</span>
+                </div>
+              </div>
+              <small style="color: #666;">Tasa de crecimiento anual de la población objetivo</small>
+            </div>
+            
+            <!-- % de participación de mercado -->
+            <div class="sensitivity-card">
+              <h4><i>📊</i> Participación de mercado inicial</h4>
+              <div class="value-display" id="participacion-mercado-value">15%</div>
+              <div class="slider-container">
+                <input type="range" id="participacion-mercado" min="1" max="30" step="0.1" value="15">
+                <div class="range-labels">
+                  <span>1%</span>
+                  <span>15%</span>
+                  <span>30%</span>
+                </div>
+              </div>
+              <small style="color: #666;">Cuota de mercado inicial estimada</small>
+            </div>
+            
+            <!-- Incremento en la participación anual -->
+            <div class="sensitivity-card">
+              <h4><i>📈</i> Crecimiento anual de participación</h4>
+              <div class="value-display" id="incremento-participacion-value">4%</div>
+              <div class="slider-container">
+                <input type="range" id="incremento-participacion" min="0" max="15" step="0.1" value="4">
+                <div class="range-labels">
+                  <span>0%</span>
+                  <span>7.5%</span>
+                  <span>15%</span>
+                </div>
+              </div>
+              <small style="color: #666;">Crecimiento anual esperado en participación de mercado</small>
+            </div>
+            
+            <!-- Unidades mensuales por cliente -->
+            <div class="sensitivity-card">
+              <h4><i>🛍️</i> Unidades mensuales por cliente</h4>
+              <div class="value-display" id="unidades-mensuales-value">4</div>
+              <div class="slider-container">
+                <input type="range" id="unidades-mensuales" min="1" max="10" step="1" value="4">
+                <div class="range-labels">
+                  <span>1</span>
+                  <span>5</span>
+                  <span>10</span>
+                </div>
+              </div>
+              <small style="color: #666;">Consumo promedio mensual por cliente</small>
+            </div>
+            
+            <!-- Precio inicial del producto -->
+            <div class="sensitivity-card">
+              <h4><i>💰</i> Precio inicial del producto</h4>
+              <div class="value-display" id="precio-inicial-value">$30</div>
+              <div class="slider-container">
+                <input type="range" id="precio-inicial" min="10" max="60" step="1" value="30">
+                <div class="range-labels">
+                  <span>$10</span>
+                  <span>$35</span>
+                  <span>$60</span>
+                </div>
+              </div>
+              <small style="color: #666;">Precio de venta inicial por unidad</small>
+            </div>
+            
+            <!-- Días de inventario -->
+            <div class="sensitivity-card">
+              <h4><i>📦</i> Días de inventario</h4>
+              <div class="value-display" id="dias-inventario-value">2</div>
+              <div class="slider-container">
+                <input type="range" id="dias-inventario" min="1" max="10" step="1" value="2">
+                <div class="range-labels">
+                  <span>1</span>
+                  <span>5</span>
+                  <span>10</span>
+                </div>
+              </div>
+              <small style="color: #666;">Días de inventario de seguridad</small>
+            </div>
+          </div>
+          
+          <div class="sensitivity-actions">
+            <button id="guardar-sensibilidad" class="btn-secondary btn-enhanced">
+              💾 Guardar Factores de Sensibilidad
+            </button>
+            <button id="aplicar-sensibilidad" class="btn-primary btn-enhanced">
+              🔄 Aplicar a Proyecciones
+            </button>
+            <button id="reset-sensibilidad" class="btn-secondary btn-enhanced">
+              ↩️ Restablecer Valores
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- [Mantener las secciones existentes de Parámetros Económicos, Costos Operativos y Exportar/Importar] -->
+      
+    </div>
+  </div>
+
+  <!-- [Mantener el indicador de auto-guardado] -->
+
+  <script src="js/main.js"></script>
+  <script>
+    // Funciones auxiliares para el HTML optimizado
+    document.addEventListener("DOMContentLoaded", function() {
+      // [Mantener los contadores de cambios existentes]
+      
+      // Configuración de los sliders de sensibilidad
+      const sensitivityInputs = [
+        'incremento-poblacion', 
+        'participacion-mercado', 
+        'incremento-participacion',
+        'unidades-mensuales',
+        'precio-inicial',
+        'dias-inventario'
+      ];
+      
+      let cambiosSensibilidad = 0;
+      const contadorSensibilidad = document.getElementById('cambios-sensibilidad');
+      
+      // Actualizar valores de los sliders
+      sensitivityInputs.forEach(id => {
+        const input = document.getElementById(id);
+        const valueDisplay = document.getElementById(`${id}-value`);
+        
+        if (input && valueDisplay) {
+          // Actualizar display inicial
+          updateSliderValue(input, valueDisplay);
+          
+          // Evento para cambios en el slider
+          input.addEventListener('input', () => {
+            updateSliderValue(input, valueDisplay);
+            cambiosSensibilidad++;
+            contadorSensibilidad.textContent = `${cambiosSensibilidad} cambios`;
+            contadorSensibilidad.className = cambiosSensibilidad > 0 ? 'changes-counter show' : 'changes-counter';
+          });
+        }
+      });
+      
+      function updateSliderValue(slider, display) {
+        if (slider.id === 'precio-inicial') {
+          display.textContent = `$${slider.value}`;
+        } else if (slider.id === 'incremento-poblacion' || 
+                   slider.id === 'participacion-mercado' || 
+                   slider.id === 'incremento-participacion') {
+          display.textContent = `${slider.value}%`;
+        } else {
+          display.textContent = slider.value;
+        }
+      }
+      
+      // Manejo de escenarios predefinidos
+      const scenarioButtons = document.querySelectorAll('.scenario-btn');
+      scenarioButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+          // Remover clase active de todos los botones
+          scenarioButtons.forEach(b => b.classList.remove('active'));
+          
+          // Agregar clase active al botón clickeado
+          this.classList.add('active');
+          
+          // Aplicar valores del escenario seleccionado
+          applyScenario(this.dataset.scenario);
+        });
+      });
+      
+      function applyScenario(scenario) {
+        const incrementoPoblacion = document.getElementById('incremento-poblacion');
+        const participacionMercado = document.getElementById('participacion-mercado');
+        const incrementoParticipacion = document.getElementById('incremento-participacion');
+        const unidadesMensuales = document.getElementById('unidades-mensuales');
+        const precioInicial = document.getElementById('precio-inicial');
+        const diasInventario = document.getElementById('dias-inventario');
+        
+        switch(scenario) {
+          case 'base':
+            // Valores base (del Excel)
+            incrementoPoblacion.value = 19;
+            participacionMercado.value = 15;
+            incrementoParticipacion.value = 4;
+            unidadesMensuales.value = 4;
+            precioInicial.value = 30;
+            diasInventario.value = 2;
+            break;
+            
+          case 'optimista':
+            // Escenario optimista
+            incrementoPoblacion.value = 25;
+            participacionMercado.value = 20;
+            incrementoParticipacion.value = 6;
+            unidadesMensuales.value = 5;
+            precioInicial.value = 35;
+            diasInventario.value = 1;
+            break;
+            
+          case 'pesimista':
+            // Escenario pesimista
+            incrementoPoblacion.value = 15;
+            participacionMercado.value = 10;
+            incrementoParticipacion.value = 2;
+            unidadesMensuales.value = 3;
+            precioInicial.value = 25;
+            diasInventario.value = 3;
+            break;
+            
+          case 'personalizado':
+            // No hacer cambios, mantener valores actuales
+            return;
+        }
+        
+        // Actualizar los displays
+        sensitivityInputs.forEach(id => {
+          const input = document.getElementById(id);
+          const valueDisplay = document.getElementById(`${id}-value`);
+          updateSliderValue(input, valueDisplay);
+        });
+        
+        // Marcar como cambios no guardados
+        cambiosSensibilidad = 1;
+        contadorSensibilidad.textContent = `${cambiosSensibilidad} cambios`;
+        contadorSensibilidad.className = 'changes-counter show';
+      }
+      
+      // Botón de reset
+      const resetBtn = document.getElementById('reset-sensibilidad');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+          applyScenario('base');
+          cambiosSensibilidad = 0;
+          contadorSensibilidad.className = 'changes-counter';
+        });
+      }
+      
+      // Botón de guardar
+      const guardarSensibilidad = document.getElementById('guardar-sensibilidad');
+      if (guardarSensibilidad) {
+        guardarSensibilidad.addEventListener('click', function() {
+          // Aquí iría la lógica para guardar los valores en el backend
+          
+          // Mostrar notificación de éxito
+          showAlert('success', 'Factores de sensibilidad guardados correctamente');
+          
+          // Resetear contador
+          cambiosSensibilidad = 0;
+          contadorSensibilidad.className = 'changes-counter';
+        });
+      }
+      
+      // Botón de aplicar
+      const aplicarSensibilidad = document.getElementById('aplicar-sensibilidad');
+      if (aplicarSensibilidad) {
+        aplicarSensibilidad.addEventListener('click', function() {
+          // Aquí iría la lógica para aplicar los cambios a las proyecciones
+          
+          // Mostrar notificación
+          showAlert('info', 'Factores aplicados a las proyecciones financieras');
+        });
+      }
+      
+      // Función para mostrar alertas
+      function showAlert(type, message) {
+        const alert = document.createElement('div');
+        alert.className = `config-alert ${type}`;
+        alert.textContent = message;
+        document.body.appendChild(alert);
+        
+        setTimeout(() => {
+          alert.remove();
+        }, 4000);
+      }
+    });
+  </script>
+  <script src="js/config.js"></script>
+</body>
+</html>

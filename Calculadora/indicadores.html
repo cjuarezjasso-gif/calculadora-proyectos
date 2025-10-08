@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Financiera - Indicadores Clave</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <h2>Proyecto Salcera</h2>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="index.html" class="nav-link"><i>📊</i> Dashboard</a></li>
+        <li class="nav-item"><a href="viabilidad.html" class="nav-link"><i>📈</i> Viabilidad</a></li>
+        <li class="nav-item"><a href="ventas.html" class="nav-link"><i>💰</i> Ventas</a></li>
+        <li class="nav-item"><a href="compras.html" class="nav-link"><i>🛒</i> Compras</a></li>
+        <li class="nav-item"><a href="indicadores.html" class="nav-link active"><i>📉</i> Indicadores</a></li>
+        <li class="nav-item"><a href="config.html" class="nav-link"><i>⚙️</i> Configuración</a></li>
+      </ul>
+    </div>
+    
+    <div class="main-content">
+      <h1 class="section-title">Indicadores Clave de Desempeño</h1>
+      
+      <div class="tabs">
+        <div class="tab active" data-tab="financieros">Financieros</div>
+        <div class="tab" data-tab="rentabilidad">Rentabilidad</div>
+        <div class="tab" data-tab="liquidez">Liquidez</div>
+      </div>
+      
+      <div class="tab-container">
+        <div id="financieros-tab" class="tab-content active">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Indicadores Financieros</h3>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="financieros-chart"></canvas>
+              </div>
+              
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Indicador</th>
+                    <th>Año 1</th>
+                    <th>Año 2</th>
+                    <th>Año 3</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>VAN</td>
+                    <td id="van-anual-1">-</td>
+                    <td id="van-anual-2">-</td>
+                    <td id="van-anual-3">-</td>
+                  </tr>
+                  <tr>
+                    <td>ROA</td>
+                    <td id="roa-1">-</td>
+                    <td id="roa-2">-</td>
+                    <td id="roa-3">-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <div id="rentabilidad-tab" class="tab-content">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Indicadores de Rentabilidad</h3>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="rentabilidad-chart"></canvas>
+              </div>
+              
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Margen</th>
+                    <th>Año 1</th>
+                    <th>Año 2</th>
+                    <th>Año 3</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Margen Bruto</td>
+                    <td id="margen-bruto-1">-</td>
+                    <td id="margen-bruto-2">-</td>
+                    <td id="margen-bruto-3">-</td>
+                  </tr>
+                  <tr>
+                    <td>Margen Neto</td>
+                    <td id="margen-neto-1">-</td>
+                    <td id="margen-neto-2">-</td>
+                    <td id="margen-neto-3">-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <div id="liquidez-tab" class="tab-content">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Indicadores de Liquidez</h3>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="liquidez-chart"></canvas>
+              </div>
+              
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Indicador</th>
+                    <th>Año 1</th>
+                    <th>Año 2</th>
+                    <th>Año 3</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Liquidez Corriente</td>
+                    <td id="liquidez-corriente-1">-</td>
+                    <td id="liquidez-corriente-2">-</td>
+                    <td id="liquidez-corriente-3">-</td>
+                  </tr>
+                  <tr>
+                    <td>Prueba Ácida</td>
+                    <td id="prueba-acida-1">-</td>
+                    <td id="prueba-acida-2">-</td>
+                    <td id="prueba-acida-3">-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script src="js/indicadores.js"></script>
+</body>
+</html>

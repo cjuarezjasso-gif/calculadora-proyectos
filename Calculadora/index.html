@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Financiera - Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <h2>Calculadora Financiera</h2>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="index.html" class="nav-link active"><i>📊</i> Dashboard</a></li>
+        <li class="nav-item"><a href="viabilidad.html" class="nav-link"><i>📈</i> Viabilidad</a></li>
+        <li class="nav-item"><a href="ventas.html" class="nav-link"><i>💰</i> Ventas</a></li>
+        <li class="nav-item"><a href="compras.html" class="nav-link"><i>🛒</i> Compras</a></li>
+        <li class="nav-item"><a href="indicadores.html" class="nav-link"><i>📉</i> Indicadores</a></li>
+        <li class="nav-item"><a href="config.html" class="nav-link"><i>⚙️</i> Configuración</a></li>
+      </ul>
+    </div>
+    
+    <div class="main-content">
+      <h1 class="section-title">Dashboard Resumen</h1>
+      
+      <div class="dashboard-grid">
+        <div class="card kpi-card">
+          <div class="kpi-label">TIR (Tasa Interna de Retorno)</div>
+          <div class="kpi-value positive" id="tir-value">0%</div>
+          <div>Rentabilidad esperada del proyecto</div>
+        </div>
+        
+        <div class="card kpi-card">
+          <div class="kpi-label">VAN (Valor Actual Neto)</div>
+          <div class="kpi-value positive" id="van-value">$0</div>
+          <div>Valor presente de los flujos futuros</div>
+        </div>
+        
+        <div class="card kpi-card">
+          <div class="kpi-label">Período de Recuperación</div>
+          <div class="kpi-value" id="pri-value">0 años</div>
+          <div>Tiempo para recuperar la inversión</div>
+        </div>
+        
+        <div class="card kpi-card">
+          <div class="kpi-label">Relación Costo/Beneficio</div>
+          <div class="kpi-value positive" id="cb-value">0.00</div>
+          <div>Beneficios vs Costos</div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Flujo de Efectivo Proyectado</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="cashflow-chart"></canvas>
+        </div>
+      </div>
+      
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Ventas vs Costos</h3>
+          </div>
+          <div class="chart-container">
+            <canvas id="sales-costs-chart"></canvas>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Composición de Costos</h3>
+          </div>
+          <div class="chart-container">
+            <canvas id="costs-breakdown-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
