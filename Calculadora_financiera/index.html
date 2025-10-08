@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Financiero de Proyectos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style/style.css">
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-100 min-h-screen">
+    <header class="bg-white shadow-lg border-b-4 border-indigo-500">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <h1 class="text-3xl font-bold text-gray-800 text-center">
+                Análisis Financiero de Proyectos
+            </h1>
+            <p class="text-center text-gray-600 mt-2">Guía paso a paso para la proyección y valuación de tu negocio</p>
+        </div>
+    </header>
+
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-12 gap-2 py-4">
+                <button class="nav-button px-3 py-2 rounded-lg text-sm active" onclick="showTab('plan')">Mercado Meta</button>
+                <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('fact-sensibil')">Proyección Ventas</button>
+                <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-vtas')">Ingresos</button>
+                <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('condiciones')">Condiciones</button>
+                <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('inversiones')">Inversiones</button>
+                <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-prod')">Producción</button>
+                <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-mtp')">Materia Prima</button>
+                <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-comp-mp')">Compras MP</button>
+                <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('valuacion-inv')">Valuación Inv.</button>
+                <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-mo')">Mano Obra</button>
+                <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-gts-i')">Gastos Indirectos</button>
+                <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('cto-prod')">Costo Vendido</button>
+                <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-sts-oper')">Gastos Operación</button>
+                <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('estado-resultados-tab')">Estado Resultados</button>
+                <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('estado-situacion-tab')">Balance</button>
+                <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('fe')">Flujo Efectivo</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
+        <!-- PESTAÑA 1: Mercado Meta con Concentración -->
+        <div id="plan" class="tab-content active">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">1. Mercado Meta y Concentración</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Población Total</label>
+                            <input type="number" id="poblacion-total" class="w-full" placeholder="Ej: 1000000" onchange="calcularPlan()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Porcentaje de Mujeres (%)</label>
+                            <input type="number" id="porcentaje-mujeres" class="w-full" placeholder="Ej: 51" step="0.1" onchange="calcularPlan()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Rango de Edad del Mercado Meta (%)</label>
+                            <input type="number" id="rango-edad" class="w-full" placeholder="Ej: 35" step="0.1" onchange="calcularPlan()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Población Ocupada (%)</label>
+                            <input type="number" id="poblacion-ocupada" class="w-full" placeholder="Ej: 65" step="0.1" onchange="calcularPlan()">
+                        </div>
+                        <div class="bg-yellow-50 p-3 rounded">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">🎯 Concentración de Mercado (%)</label>
+                            <input type="number" id="concentracion-mercado" class="w-full" placeholder="Ej: 80" step="0.1" onchange="calcularPlan()">
+                            <p class="text-xs text-gray-500 mt-1">Porcentaje del mercado donde concentrará operaciones</p>
+                        </div>
+                    </div>
+                    <div class="result-box p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Resultados</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <p class="text-sm text-gray-600">Mercado Meta Total:</p>
+                                <p id="mercado-meta" class="text-2xl font-bold text-indigo-600">0</p>
+                            </div>
+                            <div class="border-t pt-3">
+                                <p class="text-sm text-gray-600">Mercado Concentrado:</p>
+                                <p id="mercado-concentrado" class="text-2xl font-bold text-green-600">0</p>
+                            </div>
+                            <div class="mt-4 text-xs text-gray-500">
+                                <p>Fórmula: Población × % Mujeres × % Rango Edad × % Ocupada × % Concentración</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 2: Proyección con Penetración -->
+        <div id="fact-sensibil" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">2. Proyección de Ventas y Penetración</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Participación de Mercado (%)</label>
+                            <input type="number" id="participacion-mercado" class="w-full" placeholder="Ej: 5" step="0.1" onchange="calcularFactSensibil()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Incremento Anual de la Población (%)</label>
+                            <input type="number" id="incremento-poblacion" class="w-full" placeholder="Ej: 2" step="0.1" onchange="calcularFactSensibil()">
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">📈 Incremento Anual en Unidades por Vender (%)</label>
+                            <input type="number" id="incremento-producto" class="w-full" placeholder="Ej: 3" step="0.1" onchange="calcularFactSensibil()">
+                        </div>
+                        <div class="bg-green-50 p-3 rounded">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">🎯 Penetración Inicial en Mercado Meta (%)</label>
+                            <input type="number" id="penetracion-inicial" class="w-full" placeholder="Ej: 10" step="0.1" onchange="calcularFactSensibil()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Incremento Anual de Penetración (puntos %)</label>
+                            <input type="number" id="incremento-penetracion" class="w-full" placeholder="Ej: 2" step="0.1" onchange="calcularFactSensibil()">
+                        </div>
+                    </div>
+                    <div class="result-box p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Proyección a 5 Años</h3>
+                        <div id="proyeccion-mercado">
+                            <p>Configure los parámetros para ver la proyección</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 3: Precio Variable -->
+        <div id="ppto-vtas" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">3. Presupuesto de Ingresos (Precio Variable)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">💰 Precio Unitario Base ($)</label>
+                            <input type="number" id="precio-unitario-base" class="w-full" placeholder="Ej: 25.50" step="0.01" onchange="calcularPptoVtas()">
+                            <label class="block text-sm font-medium text-gray-700 mb-2 mt-3">📊 Incremento Anual de Precio (%)</label>
+                            <input type="number" id="incremento-precio" class="w-full" placeholder="Ej: 4 (inflación)" step="0.1" onchange="calcularPptoVtas()">
+                            <p class="text-xs text-gray-500 mt-2">El precio se ajustará automáticamente cada año</p>
+                        </div>
+                        <div class="space-y-3">
+                            <h4 class="font-semibold text-gray-700">Unidades a Vender por Año</h4>
+                            <div class="grid grid-cols-5 gap-2">
+                                <div><label class="block text-xs text-gray-600">Año 1</label><input type="number" id="unidades-1" class="w-full text-sm" placeholder="0" onchange="calcularPptoVtas()"></div>
+                                <div><label class="block text-xs text-gray-600">Año 2</label><input type="number" id="unidades-2" class="w-full text-sm" placeholder="0" onchange="calcularPptoVtas()"></div>
+                                <div><label class="block text-xs text-gray-600">Año 3</label><input type="number" id="unidades-3" class="w-full text-sm" placeholder="0" onchange="calcularPptoVtas()"></div>
+                                <div><label class="block text-xs text-gray-600">Año 4</label><input type="number" id="unidades-4" class="w-full text-sm" placeholder="0" onchange="calcularPptoVtas()"></div>
+                                <div><label class="block text-xs text-gray-600">Año 5</label><input type="number" id="unidades-5" class="w-full text-sm" placeholder="0" onchange="calcularPptoVtas()"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="result-box p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Proyección de Ingresos Totales ($)</h3>
+                        <div id="ventas-proyeccion"><p>Ingrese precio base y unidades para calcular</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 4 NUEVA: Condiciones Comerciales -->
+        <div id="condiciones" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">4. Condiciones de Venta y Compra</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="bg-green-50 p-4 rounded">
+                            <h4 class="font-semibold text-gray-700 mb-3">💳 Condiciones de Venta (Crédito)</h4>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Días de Crédito a Clientes</label>
+                            <input type="number" id="dias-credito-ventas" class="w-full" placeholder="Ej: 30" onchange="calcularCondicionesComerciales()">
+                            <p class="text-xs text-gray-500 mt-1">Tiempo que los clientes tienen para pagar</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h4 class="font-semibold text-gray-700 mb-3">🛒 Condiciones de Compra</h4>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Días de Crédito de Proveedores</label>
+                            <input type="number" id="dias-credito-compras" class="w-full" placeholder="Ej: 45" onchange="calcularCondicionesComerciales()">
+                            <p class="text-xs text-gray-500 mt-1">Tiempo que tiene para pagar a proveedores</p>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <h4 class="font-semibold text-gray-700 mb-3">💰 Descuentos</h4>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Descuento por Pronto Pago (%)</label>
+                            <input type="number" id="descuento-pronto-pago" class="w-full" placeholder="Ej: 2" step="0.1" onchange="calcularCondicionesComerciales()">
+                            <p class="text-xs text-gray-500 mt-1">Descuento si paga antes de tiempo a proveedores</p>
+                        </div>
+                    </div>
+                    <div class="result-box p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Análisis de Cuentas y Descuentos</h3>
+                        <div id="condiciones-comerciales-resultado">
+                            <p>Configure las condiciones para ver el análisis</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 5 NUEVA: Inversiones -->
+        <div id="inversiones" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">5. Inversiones, Depreciación y Amortización</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-gray-700 mb-3">🏭 Activos Fijos</h4>
+                            <div id="inversiones-container" class="space-y-2">
+                                <div class="inversion-item grid grid-cols-5 gap-2 mb-2">
+                                    <input type="text" placeholder="Nombre Activo" class="inv-nombre text-sm" data-index="0">
+                                    <input type="number" placeholder="Monto" class="inv-monto text-sm" step="0.01" data-index="0">
+                                    <input type="number" placeholder="Vida útil" class="inv-vida text-sm" data-index="0">
+                                    <select class="inv-tipo text-sm" data-index="0">
+                                        <option value="lineal">Lineal</option>
+                                        <option value="acelerada">Acelerada</option>
+                                    </select>
+                                    <button onclick="calcularInversiones()" class="bg-blue-500 text-white px-2 py-1 rounded text-xs">Calcular</button>
+                                </div>
+                            </div>
+                            <button onclick="agregarInversion()" class="mt-2 px-4 py-2 bg-indigo-500 text-white rounded-md text-sm hover:bg-indigo-600">
+                                + Agregar Activo Fijo
+                            </button>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded text-sm">
+                            <p class="font-semibold mb-2">📚 Métodos de Depreciación:</p>
+                            <p class="text-xs text-gray-600"><strong>Lineal:</strong> Deprecia montos iguales cada año</p>
+                            <p class="text-xs text-gray-600"><strong>Acelerada:</strong> Deprecia más al inicio (doble saldo decreciente)</p>
+                        </div>
+                    </div>
+                    <div class="result-box p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Cálculo de Depreciación por Año</h3>
+                        <div id="inversiones-resultado">
+                            <p>Agregue activos para calcular la depreciación</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 6: Producción -->
+        <div id="ppto-prod" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">6. Presupuesto de Producción</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Inventario Inicial (unidades)</label>
+                            <input type="number" id="inv-inicial-prod" class="w-full" placeholder="0" onchange="calcularPptoProd()">
+                        </div>
+                        <div class="space-y-3">
+                            <h4 class="font-semibold text-gray-700">Inventario Final Deseado (unidades)</h4>
+                            <div class="grid grid-cols-5 gap-2">
+                                <div><label class="block text-xs text-gray-600">Año 1</label><input type="number" id="inv-final-1" class="w-full text-sm" placeholder="0" onchange="calcularPptoProd()"></div>
+                                <div><label class="block text-xs text-gray-600">Año 2</label><input type="number" id="inv-final-2" class="w-full text-sm" placeholder="0" onchange="calcularPptoProd()"></div>
+                                <div><label class="block text-xs text-gray-600">Año 3</label><input type="number" id="inv-final-3" class="w-full text-sm" placeholder="0" onchange="calcularPptoProd()"></div>
+                                <div><label class="block text-xs text-gray-600">Año 4</label><input type="number" id="inv-final-4" class="w-full text-sm" placeholder="0" onchange="calcularPptoProd()"></div>
+                                <div><label class="block text-xs text-gray-600">Año 5</label><input type="number" id="inv-final-5" class="w-full text-sm" placeholder="0" onchange="calcularPptoProd()"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="result-box p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Unidades a Producir</h3>
+                        <div id="produccion-proyeccion"><p>Los datos se tomarán del presupuesto de ingresos</p></div>
+                        <div class="mt-4 text-xs text-gray-500"><p>Fórmula: Ventas + Inv. Final - Inv. Inicial</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 7: Materia Prima -->
+        <div id="ppto-mtp" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">7. Materia Prima</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-gray-700 mb-3">Receta del Producto</h4>
+                            <div id="receta-container">
+                                <div class="grid grid-cols-3 gap-2 mb-2">
+                                    <input type="text" placeholder="Materia Prima 1" class="receta-mp text-sm" onchange="calcularPptoMtp()">
+                                    <input type="number" placeholder="Cantidad por unidad" class="receta-cant text-sm" step="0.001" onchange="calcularPptoMtp()">
+                                    <input type="text" placeholder="Unidad (kg, m, etc.)" class="receta-unidad text-sm">
+                                </div>
+                            </div>
+                            <button onclick="agregarMateriaPrima()" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600">+ Agregar MP</button>
+                        </div>
+                    </div>
+                    <div class="result-box p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Consumo Total por Año</h3>
+                        <div id="consumo-mp"><p>Configure la receta para ver el consumo</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 8: Compras MP -->
+        <div id="ppto-comp-mp" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">8. Presupuesto de Compras de MP</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div id="costos-mp-container">
+                            <h4 class="font-semibold text-gray-700 mb-3">Costos Unitarios de Materia Prima</h4>
+                            <p class="text-sm text-gray-600">Configure primero las materias primas</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700 mb-3">Inventarios de Materia Prima</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Inv. Inicial de MP</label>
+                                    <input type="number" id="inv-inicial-mp" class="w-full text-sm" placeholder="0" onchange="calcularComprasMP()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Inv. Final de MP (% consumo)</label>
+                                    <input type="number" id="inv-final-mp-pct" class="w-full text-sm" placeholder="10" step="0.1" onchange="calcularComprasMP()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="result-box p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Presupuesto de Compras ($)</h3>
+                        <div id="compras-mp-resultado"><p>Configure costos y consumo de MP</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 9: Valuación Inventarios -->
+        <div id="valuacion-inv" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">9. Valuación de Inventarios Finales</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="result-box p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Inventario Final de Materias Primas</h3>
+                        <div id="valuacion-mp"><p>Se calculará automáticamente</p></div>
+                    </div>
+                    <div class="result-box p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Inventario Final de Productos Terminados</h3>
+                        <div id="valuacion-pt"><p>Se calculará automáticamente</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 10: Mano Obra -->
+        <div id="ppto-mo" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">10. Presupuesto de Mano de Obra</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tiempo por Unidad (horas)</label>
+                            <input type="number" id="tiempo-unidad" class="w-full" placeholder="Ej: 0.5" step="0.01" onchange="calcularPptoMO()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Costo por Hora ($)</label>
+                            <input type="number" id="costo-hora" class="w-full" placeholder="Ej: 15.00" step="0.01" onchange="calcularPptoMO()">
+                        </div>
+                    </div>
+                    <div class="result-box p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Costo de Mano de Obra Proyectado</h3>
+                        <div id="costo-mo"><p>Ingrese los datos para calcular</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 11: Gastos Indirectos -->
+        <div id="ppto-gts-i" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">11. Gastos Indirectos de Producción</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-gray-700 mb-3">Costos Fijos Anuales</h4>
+                            <div class="space-y-2">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="text" placeholder="Concepto (ej: Renta)" class="gasto-fijo-concepto text-sm">
+                                    <input type="number" placeholder="Monto anual" class="gasto-fijo-monto text-sm" step="0.01" onchange="calcularGastosIndirectos()">
+                                </div>
+                            </div>
+                            <button onclick="agregarGastoFijo()" class="mt-2 px-4 py-2 bg-green-500 text-white rounded-md text-sm hover:bg-green-600">+ Agregar Gasto Fijo</button>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700 mb-3">Costos Variables</h4>
+                            <div class="space-y-2">
+                                <div class="grid grid-cols-3 gap-2">
+                                    <input type="text" placeholder="Concepto" class="gasto-var-concepto text-sm">
+                                    <input type="number" placeholder="Por unidad" class="gasto-var-unidad text-sm" step="0.001" onchange="calcularGastosIndirectos()">
+                                    <input type="text" placeholder="Unidad" class="gasto-var-tipo text-sm">
+                                </div>
+                            </div>
+                            <button onclick="agregarGastoVariable()" class="mt-2 px-4 py-2 bg-yellow-500 text-white rounded-md text-sm hover:bg-yellow-600">+ Agregar Gasto Variable</button>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Inflación Anual (%)</label>
+                            <input type="number" id="inflacion-anual" class="w-full" placeholder="Ej: 3.5" step="0.1" onchange="calcularGastosIndirectos()">
+                        </div>
+                    </div>
+                    <div class="result-box p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Gastos Indirectos Proyectados</h3>
+                        <div id="gastos-indirectos-resultado"><p>Configure los gastos para ver la proyección</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 12: Costo Producción -->
+        <div id="cto-prod" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">12. Costo de Producción y de lo Vendido</h2>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="result-box p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">Costo de Producción por Año</h3>
+                            <div id="costo-produccion-anual"><p>Se calculará con los datos anteriores</p></div>
+                        </div>
+                        <div class="result-box p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">Costo de lo Vendido</h3>
+                            <div id="costo-vendido-anual"><p>Se calculará automáticamente</p></div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Inv. Inicial Producto Terminado</label>
+                                <input type="number" id="inv-inicial-pt" class="w-full" placeholder="0" step="0.01" onchange="calcularCostoProduccion()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Costo Unitario PT (se calcula)</label>
+                                <input type="number" id="costo-unitario-pt" class="w-full bg-gray-100" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 13: Gastos Operación -->
+        <div id="ppto-sts-oper" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">13. Gastos de Operación</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-gray-700 mb-3">Gastos Administrativos</h4>
+                            <div id="gastos-admin-container">
+                                <div class="grid grid-cols-2 gap-2 mb-2">
+                                    <input type="text" placeholder="Concepto" class="gasto-admin-concepto text-sm">
+                                    <input type="number" placeholder="Monto mensual" class="gasto-admin-monto text-sm" step="0.01" onchange="calcularGastosOperacion()">
+                                </div>
+                            </div>
+                            <button onclick="agregarGastoAdmin()" class="mt-2 px-4 py-2 bg-purple-500 text-white rounded-md text-sm hover:bg-purple-600">+ Agregar Gasto Admin</button>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700 mb-3">Gastos de Ventas</h4>
+                            <div id="gastos-ventas-container">
+                                <div class="grid grid-cols-2 gap-2 mb-2">
+                                    <input type="text" placeholder="Concepto" class="gasto-ventas-concepto text-sm">
+                                    <input type="number" placeholder="% de ventas" class="gasto-ventas-pct text-sm" step="0.1" onchange="calcularGastosOperacion()">
+                                </div>
+                            </div>
+                            <button onclick="agregarGastoVentas()" class="mt-2 px-4 py-2 bg-orange-500 text-white rounded-md text-sm hover:bg-orange-600">+ Agregar Gasto Ventas</button>
+                        </div>
+                    </div>
+                    <div class="result-box p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Gastos de Operación Totales</h3>
+                        <div id="gastos-operacion-resultado"><p>Configure los gastos para ver la proyección</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 14 NUEVA: Estado Resultados -->
+        <div id="estado-resultados-tab" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">📊 Estado de Resultados Integral (ERI)</h2>
+                <div class="result-box p-4 rounded-lg">
+                    <div id="estado-resultados">
+                        <p class="text-gray-500">Complete todos los presupuestos anteriores para generar el estado de resultados</p>
+                    </div>
+                </div>
+                <div class="mt-4 bg-blue-50 p-4 rounded">
+                    <h4 class="font-semibold text-blue-800 mb-2">ℹ️ Información</h4>
+                    <p class="text-sm text-gray-600">El Estado de Resultados muestra la rentabilidad del proyecto incluyendo:</p>
+                    <ul class="text-xs text-gray-600 mt-2 space-y-1 ml-4">
+                        <li>• Ingresos por ventas con precios variables</li>
+                        <li>• Costo de lo vendido</li>
+                        <li>• Gastos de operación</li>
+                        <li>• Depreciación y amortización</li>
+                        <li>• ISR (30%)</li>
+                        <li>• Utilidad neta después de impuestos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 15 NUEVA: Balance -->
+        <div id="estado-situacion-tab" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">🏦 Estado de Situación Financiera (Balance General)</h2>
+                <div class="result-box p-4 rounded-lg">
+                    <div id="estado-situacion">
+                        <p class="text-gray-500">Complete todos los datos anteriores para generar el balance</p>
+                    </div>
+                </div>
+                <div class="mt-4 bg-green-50 p-4 rounded">
+                    <h4 class="font-semibold text-green-800 mb-2">ℹ️ Información</h4>
+                    <p class="text-sm text-gray-600">El Balance muestra la situación financiera incluyendo:</p>
+                    <ul class="text-xs text-gray-600 mt-2 space-y-1 ml-4">
+                        <li>• <strong>Activos:</strong> Efectivo, Cuentas por Cobrar, Inventarios, Activo Fijo</li>
+                        <li>• <strong>Pasivos:</strong> Cuentas por Pagar, Impuestos por Pagar</li>
+                        <li>• <strong>Capital:</strong> Inversión inicial y utilidades retenidas</li>
+                    </ul>
+                    <p class="text-xs text-gray-500 mt-2">Ecuación: Activos = Pasivos + Capital</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 16: Flujo Efectivo -->
+        <div id="fe" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">16. Flujo de Efectivo y Resumen</h2>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Inversión Inicial ($)</label>
+                            <input type="number" id="inversion-inicial" class="w-full" placeholder="0" step="0.01" onchange="calcularFlujoEfectivo()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Saldo Inicial ($)</label>
+                            <input type="number" id="saldo-inicial" class="w-full" placeholder="0" step="0.01" onchange="calcularFlujoEfectivo()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">% Cobro en Efectivo</label>
+                            <input type="number" id="pct-cobro-efectivo" class="w-full" placeholder="80" step="0.1" onchange="calcularFlujoEfectivo()">
+                        </div>
+                    </div>
+                    <div class="result-box p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Proyección de Flujo de Efectivo</h3>
+                        <div id="flujo-efectivo-resultado"><p>Se calculará con todos los datos anteriores</p></div>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-blue-800 mb-2">Resumen Ejecutivo</h4>
+                        <div id="resumen-ejecutivo"><p>Complete todos los presupuestos para ver el resumen</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div class="fixed bottom-6 right-6 space-y-3 z-40">
+        <button onclick="exportarDatos()" class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110" title="Exportar Datos (Ctrl+S)">
+            📊
+        </button>
+        <button onclick="imprimirReporte()" class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110" title="Imprimir Reporte (Ctrl+P)">
+            🖨️
+        </button>
+    </div>
+
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-gray-400">Análisis Financiero de Proyectos v2.0 - Herramienta de Gestión Empresarial</p>
+            <div class="mt-4 text-sm text-gray-500">
+                <p>💡 Consejos: Usa Ctrl+S para exportar • Ctrl+P para imprimir • Los cálculos se actualizan automáticamente</p>
+                <p class="mt-2">✨ Nuevas funcionalidades: Concentración, Penetración, Precio Variable, Condiciones Comerciales, Depreciación, Estados Financieros</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
