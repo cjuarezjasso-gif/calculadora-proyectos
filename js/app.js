@@ -1265,3 +1265,205 @@ function cargarProyecto(id) {
 // 3. EVENTO QUE INICIA TODO AL CARGAR LA PÁGINA
 // Carga la lista de proyectos cuando el DOM está listo
 document.addEventListener('DOMContentLoaded', cargarListaDeProyectos);
+
+// graficar proyección de mercado
+// ===========================
+// GRÁFICOS CON CHART.JS
+// ===========================
+
+let chartVentas = null;
+let chartResultados = null;
+let chartFlujo = null;
+
+// Gráfico 1: Ingresos y Costos por Año (Pestaña Ventas)
+function generarGraficoVentas() {
+    const ctx = document.getElementById('chartVentas');
+    if (!ctx) return;
+    
+    if (chartVentas) chartVentas.destroy();
+    
+    chartVentas = new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: ['Año 1', 'Año 2', 'Año 3', 'Año 4', 'Año 5'],
+            datasets: [
+                {
+                    label: 'Ingresos',
+                    data: globalData.ventasProyeccion,
+                    borderColor: '#27ae60',
+                    backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3
+                },
+                {
+                    label: 'Costo de Ventas',
+                    data: globalData.costoVendido,
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                title: {
+                    display: true,
+                    text: 'Proyección de Ingresos vs Costos',
+                    font: { size: 16, weight: 'bold' }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString('es-MX');
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Gráfico 2: Utilidad Neta (Pestaña Estado de Resultados)
+function generarGraficoResultados() {
+    const ctx = document.getElementById('chartResultados');
+    if (!ctx) return;
+    
+    if (chartResultados) chartResultados.destroy();
+    
+    chartResultados = new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Año 1', 'Año 2', 'Año 3', 'Año 4', 'Año 5'],
+            datasets: [{
+                label: 'Utilidad Neta',
+                data: globalData.utilidadNeta,
+                backgroundColor: globalData.utilidadNeta.map(val => 
+                    val >= 0 ? 'rgba(39, 174, 96, 0.7)' : 'rgba(231, 76, 60, 0.7)'
+                ),
+                borderColor: globalData.utilidadNeta.map(val => 
+                    val >= 0 ? '#27ae60' : '#e74c3c'
+                ),
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Utilidad Neta por Año',
+                    font: { size: 16, weight: 'bold' }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString('es-MX');
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Gráfico 3: Flujo de Efectivo (Pestaña Flujo Efectivo)
+function generarGraficoFlujo() {
+    const ctx = document.getElementById('chartFlujo');
+    if (!ctx) return;
+    
+    if (chartFlujo) chartFlujo.destroy();
+    
+    // Calcular flujo neto por año
+    const flujoNeto = [];
+    for (let i = 0; i < 5; i++) {
+        const ingresos = globalData.ventasProyeccion[i] * 0.8; // % cobro efectivo
+        const egresos = (globalData.comprasMP[i] || 0) + 
+                       (globalData.costoMO[i] || 0) + 
+                       (globalData.gastosIndirectos[i] || 0) + 
+                       (globalData.gastosOperacion[i] || 0);
+        flujoNeto.push(ingresos - egresos);
+    }
+    
+    chartFlujo = new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Año 1', 'Año 2', 'Año 3', 'Año 4', 'Año 5'],
+            datasets: [{
+                label: 'Flujo Neto de Efectivo',
+                data: flujoNeto,
+                backgroundColor: flujoNeto.map(val => 
+                    val >= 0 ? 'rgba(52, 152, 219, 0.7)' : 'rgba(231, 76, 60, 0.7)'
+                ),
+                borderColor: flujoNeto.map(val => 
+                    val >= 0 ? '#3498db' : '#e74c3c'
+                ),
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Flujo de Efectivo por Año',
+                    font: { size: 16, weight: 'bold' }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString('es-MX');
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ===========================
+// ACTUALIZAR GRÁFICOS AUTOMÁTICAMENTE
+// ===========================
+
+// Modifica tus funciones existentes para actualizar los gráficos
+const calcularPptoVtasOriginal = calcularPptoVtas;
+calcularPptoVtas = function() {
+    calcularPptoVtasOriginal();
+    generarGraficoVentas();
+}
+
+const calcularEstadoResultadosOriginal = calcularEstadoResultados;
+calcularEstadoResultados = function() {
+    calcularEstadoResultadosOriginal();
+    generarGraficoResultados();
+}
+
+const calcularFlujoEfectivoOriginal = calcularFlujoEfectivo;
+calcularFlujoEfectivo = function() {
+    calcularFlujoEfectivoOriginal();
+    generarGraficoFlujo();
+}
