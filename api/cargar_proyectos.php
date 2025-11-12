@@ -1,7 +1,7 @@
 <?php
 require_once 'conexion.php';
 
-$sql = "SELECT id_proyecto, nombre_proyecto FROM Proyectos ORDER BY fecha_creacion DESC";
+$sql = "SELECT id_proyecto, nombre_proyecto FROM proyectos ORDER BY fecha_creacion DESC";
 $resultado = $conexion->query($sql);
 
 $proyectos = [];
