@@ -5,15 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Análisis Financiero de Proyectos</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style/style.css">
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-indigo-100 min-h-screen">
+    
+    <div id="modal-moneda" class="fixed inset-0 bg-gray-900 bg-opacity-90 z-[100] flex items-center justify-center" style="display: flex;">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center">
+            <h2 class="text-3xl font-bold text-indigo-700 mb-4">🌍 Bienvenido</h2>
+            <p class="text-gray-600 mb-6">Selecciona la moneda de tu proyecto:</p>
+            
+            <div class="grid grid-cols-1 gap-3">
+                <button onclick="seleccionarMoneda('MXN', 'es-MX')" class="p-4 border-2 border-indigo-100 rounded-lg hover:bg-indigo-50 transition-all flex justify-between group">
+                    <span class="font-bold text-gray-700">🇲🇽 Peso Mexicano (MXN)</span><span>💰</span>
+                </button>
+                <button onclick="seleccionarMoneda('USD', 'en-US')" class="p-4 border-2 border-indigo-100 rounded-lg hover:bg-indigo-50 transition-all flex justify-between group">
+                    <span class="font-bold text-gray-700">🇺🇸 Dólar (USD)</span><span>💵</span>
+                </button>
+                <button onclick="seleccionarMoneda('EUR', 'es-ES')" class="p-4 border-2 border-indigo-100 rounded-lg hover:bg-indigo-50 transition-all flex justify-between group">
+                    <span class="font-bold text-gray-700">🇪🇺 Euro (EUR)</span><span>€</span>
+                </button>
+            </div>
+        </div>
+    </div>
     <header class="bg-white shadow-lg border-b-4 border-indigo-500">
         <div class="max-w-7xl mx-auto px-4 py-6">
             <h1 class="text-3xl font-bold text-gray-800 text-center">
                 Análisis Financiero de Proyectos
             </h1>
             <p class="text-center text-gray-600 mt-2">Guía paso a paso para la proyección y valuación de tu negocio</p>
+        </div>
+        
+        <div class="bg-indigo-600 text-white p-2 text-center text-sm flex justify-center items-center space-x-4">
+            <span id="status-socket" class="w-3 h-3 bg-red-500 rounded-full" title="Desconectado"></span>
+            
+            <span class="font-mono text-base">
+                <span id="label-moneda" class="font-bold">1 USD</span> : 
+                <strong id="valor-dolar">Cargando...</strong>
+            </span>
+            
+            <button onclick="pedirTipoCambio()" class="bg-indigo-500 hover:bg-indigo-400 text-white px-2 py-1 rounded text-xs transition-colors">
+                🔄 Refrescar
+            </button>
+
+            <button onclick="mostrarModal()" class="bg-white text-indigo-600 px-3 py-1 rounded text-xs font-bold hover:bg-gray-100 transition-colors border border-transparent hover:border-white">
+                💱 Cambiar Moneda
+            </button>
         </div>
     </header>
 
@@ -330,7 +367,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Inflación Anual (%)</label>
-                            <input type="number" id="inflacion-anual" class="w-full" placeholder="Ej: 3.5" step="0.1" onchange="calcularGastosIndirectos()">
+                            <input type="number" id="inflacion-anual" class="w-full bg-gray-100" placeholder="Automático..." step="0.1" READONLY>
                         </div>
                     </div>
                     <div class="result-box p-4 rounded-lg">
@@ -588,13 +625,55 @@
 
     </main>
 
-    <div class="fixed bottom-6 right-6 space-y-3 z-40">
+    <div class="fixed bottom-6 right-6 space-y-3 z-40 flex flex-col items-center">
+        
+        <button onclick="mostrarGraficos()" class="bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110" title="Ver Gráficos de Rentabilidad">
+            📈
+        </button>    
         <button onclick="exportarDatos()" class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110" title="Exportar Datos (Ctrl+S)">
             📊
         </button>
         <button onclick="imprimirReporte()" class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110" title="Imprimir Reporte (Ctrl+P)">
             🖨️
         </button>
+    </div>
+    <div id="modal-graficos" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[100] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col overflow-hidden relative">
+            
+            <div class="bg-gray-100 px-6 py-4 border-b flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">📊 Tablero de Rentabilidad</h2>
+                <button onclick="document.getElementById('modal-graficos').style.display='none'" class="text-gray-500 hover:text-red-600 text-3xl font-bold leading-none">&times;</button>
+            </div>
+
+            <div class="p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <div class="bg-white border rounded-lg p-3 shadow-sm h-80">
+                    <h3 class="font-bold text-gray-700 text-sm mb-2 text-center">Ventas vs. Costos (5 Años)</h3>
+                    <div class="relative h-64 w-full">
+                        <canvas id="graficoVentasCostos"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white border rounded-lg p-3 shadow-sm h-80">
+                    <h3 class="font-bold text-gray-700 text-sm mb-2 text-center">Recuperación de Inversión</h3>
+                    <div class="relative h-64 w-full">
+                        <canvas id="graficoFlujo"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white border rounded-lg p-3 shadow-sm lg:col-span-2 flex flex-col items-center h-80">
+                    <h3 class="font-bold text-gray-700 text-sm mb-2 text-center">Estructura de Costos (Año 1)</h3>
+                    <div class="relative h-64 w-64">
+                        <canvas id="graficoPastel"></canvas>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="bg-gray-50 px-6 py-3 border-t text-right">
+                <button onclick="document.getElementById('modal-graficos').style.display='none'" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 text-sm">Cerrar</button>
+            </div>
+        </div>
     </div>
 
     <footer class="bg-gray-800 text-white py-8 mt-12">

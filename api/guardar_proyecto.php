@@ -22,10 +22,11 @@ $campos = [
     'dias_credito_compras', 'descuento_pronto_pago', 'inv_inicial_prod', 
     'inv_final_a1', 'inv_final_a2', 'inv_final_a3', 'inv_final_a4', 'inv_final_a5', 
     'inv_inicial_mp', 'inv_final_mp_pct', 'tiempo_unidad_mo', 'costo_hora_mo',
-    'inversion_inicial'
+    'inversion_inicial', 'inflacion_anual',
+    'saldo_inicial', 'pct_cobro_efectivo'
 ];
 // Tipos de datos para bind_param: s=string, i=integer, d=double/decimal
-$tipos = 's' . str_repeat('d', 17) . 'ii' . str_repeat('d', 11) . 'd';
+$tipos = 's' . str_repeat('d', 17) . 'ii' . str_repeat('d', 15);
 
 if (empty($id_proyecto)) {
     // --- Lógica INSERT (Crear proyecto nuevo) ---

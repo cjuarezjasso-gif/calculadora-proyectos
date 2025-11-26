@@ -1,54 +1,62 @@
-version: '3.8'
+version: '3.8' # (Puedes borrar esta línea si quieres)
 
 services:
-  # -----------------------------------------------
-  # SERVICIO NUEVO: Servidor Web (Apache + PHP)
-  # -----------------------------------------------
   web:
-    # Usamos una imagen oficial que ya trae Apache y PHP
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .  # <-- Esto le dice que use el Dockerfile
     container_name: apache_calculadora
     restart: unless-stopped
-    
-    # Mapeamos el puerto 8080 de tu PC al puerto 80 del contenedor
     ports:
-      - "8080:80" 
-      
-    # Esta es la parte más importante:
-    # Monta tu carpeta actual (./) dentro del servidor Apache
+      - "8080:80"
+      - "8081:8081"
+    
     volumes:
+      # --- ¡VOLVEMOS A VINCULAR TUS ARCHIVOS! ---
+      # Si editas un archivo en VS Code, el contenedor lo verá al instante.
       - ./api:/var/www/html/api
       - ./js:/var/www/html/js
       - ./style:/var/www/html/style
+      - ./bin:/var/www/html/bin
       - ./index.html:/var/www/html/index.html
       
-    # Le decimos que este servicio depende de la base de datos
+      # --- ESTO ES NUEVO ---
+      # Guardamos la carpeta 'vendor' para no tener que reinstalarla
+      - vendor-data:/var/www/html/vendor
+      
     depends_on:
       - db
 
-  # -----------------------------------------------
-  # SERVICIO VIEJO: Base de Datos (MySQL)
-  # -----------------------------------------------
   db:
+    # (El servicio 'db' no cambia, déjalo como estaba)
     image: mysql:8.0
     container_name: mysql_calculadora
-    restart: unless-stopped
-    
-    # Este comando lo dejamos para que Workbench funcione
     command: --default-authentication-plugin=mysql_native_password
-    
     environment:
       MYSQL_ROOT_PASSWORD: 'admin1234'
       MYSQL_DATABASE: 'analisis_financiero_db'
-      
     ports:
-      # Dejamos esto para que puedas conectarte con Workbench
-      - "3307:3306" 
-      
+      - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+  
+  # -----------------------------------------------
+  # SERVICIO NUEVO: Respaldo Automático (Cron)
+  # -----------------------------------------------
+  cron_backup:
+    image: alpine:3.19
+    container_name: sistema_respaldos
+    depends_on:
+      - db
+    volumes:
+      # Conectamos la carpeta de tu compu con la del contenedor
+      - ./backups:/backups
+    # Este comando instala el cliente MySQL y programa la tarea cada 5 min
+    command: >
+      sh -c "apk add --no-cache mysql-client && 
+      echo '*/5 * * * * mysqldump -h db -u root -padmin1234 analisis_financiero_db > /backups/respaldo_$$(date +\%Y\%m\%d_\%H\%M\%S).sql' > /etc/crontabs/root && 
+      crond -f"
+
+
 
 volumes:
   mysql-data:
+  vendor-data: # <--- Volumen nuevo para las librerías
