@@ -114,7 +114,9 @@ function calcularFactSensibil() {
     const penetracionInicial = parseFloat(document.getElementById('penetracion-inicial').value) || 0;
     const incrementoPenetracion = parseFloat(document.getElementById('incremento-penetracion').value) || 0;
     
-    const mercadoBase = globalData.mercadoMeta;
+    // Usar el mercado concentrado si existe, si no, el normal
+    const concentracion = globalData.porcentajeConcentracion > 0 ? (globalData.porcentajeConcentracion / 100) : 1;
+    const mercadoBase = globalData.mercadoMeta * concentracion;
     
     if (mercadoBase === 0 && (participacionMercado > 0 || penetracionInicial > 0)) {
         document.getElementById('proyeccion-mercado').innerHTML = '<p class="text-red-500">Primero complete la sección de Mercado Meta</p>';
@@ -872,7 +874,9 @@ function nuevoProyecto() {
     calcularInversiones();
     calcularGastosOperacion();
     calcularFlujoEfectivo();
-    
+    // Escondemos el botón flotante de actualizar
+    document.getElementById('btn-flotante-actualizar').style.display = 'none';
+
     console.log('Formulario limpiado.');
 }
 
@@ -1202,6 +1206,8 @@ function cargarProyecto(id) {
             calcularFlujoEfectivo();
 
             alert(`Proyecto "${datos.nombre_proyecto}" cargado correctamente.`);
+            // Mostramos el botón flotante de actualizar
+            document.getElementById('btn-flotante-actualizar').style.display = 'block';
         })
         .catch(error => {
             console.error('Error al cargar el proyecto:', error);
@@ -1571,4 +1577,38 @@ function mostrarGraficos() {
         },
         options: { responsive: true }
     });
+}
+// ==========================================
+// EFECTOS VISUALES: SCROLL Y MENÚ COLAPSABLE
+// ==========================================
+
+// 1. Ocultar el título gigante al hacer scroll (Este lo dejamos porque se ve muy pro)
+window.addEventListener('scroll', () => {
+    const recuadroTitulo = document.getElementById('recuadro-titulo');
+    if (window.scrollY > 50) {
+        recuadroTitulo.classList.remove('py-6', 'max-h-40', 'opacity-100');
+        recuadroTitulo.classList.add('py-0', 'max-h-0', 'opacity-0');
+    } else {
+        recuadroTitulo.classList.remove('py-0', 'max-h-0', 'opacity-0');
+        recuadroTitulo.classList.add('py-6', 'max-h-40', 'opacity-100');
+    }
+});
+
+// 2. Función para abrir y cerrar el menú de pestañas
+function togglePestanas() {
+    const contenedor = document.getElementById('contenedor-pestanas');
+    const icono = document.getElementById('icono-pestanas');
+
+    // Si está escondido (tiene altura 0), lo abrimos
+    if (contenedor.classList.contains('max-h-0')) {
+        contenedor.classList.remove('max-h-0', 'opacity-0');
+        contenedor.classList.add('max-h-[500px]', 'opacity-100');
+        icono.textContent = '▼';
+    } 
+    // Si está abierto, lo escondemos (lo hacemos línea)
+    else {
+        contenedor.classList.remove('max-h-[500px]', 'opacity-100');
+        contenedor.classList.add('max-h-0', 'opacity-0');
+        icono.textContent = '▲';
+    }
 }

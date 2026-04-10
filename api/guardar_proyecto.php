@@ -6,12 +6,8 @@ error_reporting(E_ALL);
 require_once 'conexion.php';
 $datos = json_decode(file_get_contents('php://input'), true);
 
-// Verificamos si es un proyecto existente o uno nuevo
 $id_proyecto = isset($datos['id_proyecto']) && !empty($datos['id_proyecto']) ? $datos['id_proyecto'] : null;
 
-// --- ESTA ES LA PARTE QUE FALTABA ---
-
-// Lista de todos los campos que vienen de app.js y coinciden con la tabla 'proyectos'
 $campos = [
     'nombre_proyecto', 'poblacion_total', 'pct_mujeres', 'pct_rango_edad', 
     'pct_poblacion_ocupada', 'pct_concentracion_mercado', 'participacion_mercado', 
@@ -25,127 +21,153 @@ $campos = [
     'inversion_inicial', 'inflacion_anual',
     'saldo_inicial', 'pct_cobro_efectivo'
 ];
-// Tipos de datos para bind_param: s=string, i=integer, d=double/decimal
-$tipos = 's' . str_repeat('d', 17) . 'ii' . str_repeat('d', 15);
+
+// Arreglo temporal para guardar las variables y que Oracle pueda leerlas
+$bind_vars = [];
 
 if (empty($id_proyecto)) {
-    // --- Lógica INSERT (Crear proyecto nuevo) ---
-    
+    // --- INSERT: ORACLE STYLE ---
     $columnas_sql = implode(', ', $campos);
-    $placeholders = implode(', ', array_fill(0, count($campos), '?'));
-    
-    $sql = "INSERT INTO proyectos ($columnas_sql) VALUES ($placeholders)";
-    $stmt = $conexion->prepare($sql);
-
-    $valores = [];
+    $placeholders = [];
     foreach ($campos as $campo) {
-        $valores[] = $datos[$campo] ?? null; // Usar null si la llave no existe
+        $placeholders[] = ':' . $campo;
+    }
+    $placeholders_sql = implode(', ', $placeholders);
+    
+    // En Oracle pedimos el ID de regreso con RETURNING
+    $sql = "INSERT INTO proyectos ($columnas_sql) VALUES ($placeholders_sql) RETURNING id_proyecto INTO :id_generado";
+    $stmt = oci_parse($conexion, $sql);
+
+    foreach ($campos as $campo) {
+        $bind_vars[$campo] = $datos[$campo] ?? null;
+        oci_bind_by_name($stmt, ':' . $campo, $bind_vars[$campo]);
     }
     
-    $stmt->bind_param($tipos, ...$valores);
-    $stmt->execute();
-    $id_proyecto = $conexion->insert_id; // Obtenemos el ID del nuevo proyecto
-    $stmt->close();
+    // Variable para atrapar el nuevo ID
+    $nuevo_id = 0;
+    oci_bind_by_name($stmt, ':id_generado', $nuevo_id, -1, SQLT_INT);
+    
+    oci_execute($stmt);
+    $id_proyecto = $nuevo_id; 
+    oci_free_statement($stmt);
     
 } else {
-    // --- Lógica UPDATE (Actualizar proyecto existente) ---
-    
+    // --- UPDATE: ORACLE STYLE ---
     $set_sql = [];
     foreach ($campos as $campo) {
-        $set_sql[] = "$campo = ?";
+        $set_sql[] = "$campo = :$campo";
     }
     $set_sql_string = implode(', ', $set_sql);
 
-    $sql = "UPDATE proyectos SET $set_sql_string WHERE id_proyecto = ?";
-    $stmt = $conexion->prepare($sql);
+    $sql = "UPDATE proyectos SET $set_sql_string WHERE id_proyecto = :id_proyecto";
+    $stmt = oci_parse($conexion, $sql);
 
-    $valores = [];
     foreach ($campos as $campo) {
-        $valores[] = $datos[$campo] ?? null;
+        $bind_vars[$campo] = $datos[$campo] ?? null;
+        oci_bind_by_name($stmt, ':' . $campo, $bind_vars[$campo]);
     }
-    $valores[] = $id_proyecto; // Añadimos el ID al final para el WHERE
+    oci_bind_by_name($stmt, ':id_proyecto', $id_proyecto);
     
-    $stmt->bind_param($tipos . 'i', ...$valores); // Añadimos 'i' para el id_proyecto
-    $stmt->execute();
-    $stmt->close();
+    oci_execute($stmt);
+    oci_free_statement($stmt);
     
-    // Y la lógica de BORRAR detalles viejos
-    $conexion->query("DELETE FROM inversiones WHERE fk_id_proyecto = $id_proyecto");
-    $conexion->query("DELETE FROM materias_primas WHERE fk_id_proyecto = $id_proyecto");
-    $conexion->query("DELETE FROM gastos_administrativos WHERE fk_id_proyecto = $id_proyecto");
-    $conexion->query("DELETE FROM gastos_ventas WHERE fk_id_proyecto = $id_proyecto");
-    $conexion->query("DELETE FROM gastos_indirectos_fijos WHERE fk_id_proyecto = $id_proyecto"); 
-    $conexion->query("DELETE FROM gastos_indirectos_variables WHERE fk_id_proyecto = $id_proyecto"); 
+    // Lógica para borrar detalles viejos optimizada para Oracle
+    $tablas_limpiar = ['inversiones', 'materias_primas', 'gastos_administrativos', 'gastos_ventas', 'gastos_indirectos_fijos', 'gastos_indirectos_variables'];
+    foreach ($tablas_limpiar as $tabla) {
+        $sql_del = "DELETE FROM $tabla WHERE fk_id_proyecto = :id";
+        $stmt_del = oci_parse($conexion, $sql_del);
+        oci_bind_by_name($stmt_del, ':id', $id_proyecto);
+        oci_execute($stmt_del);
+        oci_free_statement($stmt_del);
+    }
 }
 
-// --- FIN DE LA PARTE QUE FALTABA ---
+// --- GUARDAR DETALLES ---
 
-
-// --- GUARDAR DETALLES (TODOS LOS BLOQUES) ---
-// (Esta parte ya la tenías bien)
 if (!empty($datos['inversiones'])) {
-    $sql_inversion = "INSERT INTO inversiones (fk_id_proyecto, nombre_activo, monto, vida_util_anios, metodo_depreciacion) VALUES (?, ?, ?, ?, ?)";
-    $stmt_inversion = $conexion->prepare($sql_inversion);
+    $sql_inversion = "INSERT INTO inversiones (fk_id_proyecto, nombre_activo, monto, vida_util_anios, metodo_depreciacion) VALUES (:id, :nombre, :monto, :vida, :metodo)";
+    $stmt_inversion = oci_parse($conexion, $sql_inversion);
     foreach ($datos['inversiones'] as $inversion) {
-        $stmt_inversion->bind_param("isdis", $id_proyecto, $inversion['nombre'], $inversion['monto'], $inversion['vida_util'], $inversion['tipo']);
-        $stmt_inversion->execute();
+        $nombre = $inversion['nombre']; $monto = $inversion['monto']; $vida = $inversion['vida_util']; $metodo = $inversion['tipo'];
+        oci_bind_by_name($stmt_inversion, ':id', $id_proyecto);
+        oci_bind_by_name($stmt_inversion, ':nombre', $nombre);
+        oci_bind_by_name($stmt_inversion, ':monto', $monto);
+        oci_bind_by_name($stmt_inversion, ':vida', $vida);
+        oci_bind_by_name($stmt_inversion, ':metodo', $metodo);
+        oci_execute($stmt_inversion);
     }
-    $stmt_inversion->close();
+    oci_free_statement($stmt_inversion);
 }
 
 if (!empty($datos['materias_primas'])) {
-    $sql_mp = "INSERT INTO materias_primas (fk_id_proyecto, nombre_mp, cantidad_por_unidad_prod, unidad_medida, costo_unitario) VALUES (?, ?, ?, ?, ?)";
-    $stmt_mp = $conexion->prepare($sql_mp);
+    $sql_mp = "INSERT INTO materias_primas (fk_id_proyecto, nombre_mp, cantidad_por_unidad_prod, unidad_medida, costo_unitario) VALUES (:id, :nombre, :cant, :unidad, :costo)";
+    $stmt_mp = oci_parse($conexion, $sql_mp);
     foreach ($datos['materias_primas'] as $mp) {
-        $stmt_mp->bind_param("isdsd", $id_proyecto, $mp['nombre'], $mp['cantidad'], $mp['unidad'], $mp['costo_unitario']);
-        $stmt_mp->execute();
+        $nombre = $mp['nombre']; $cant = $mp['cantidad']; $unidad = $mp['unidad']; $costo = $mp['costo_unitario'];
+        oci_bind_by_name($stmt_mp, ':id', $id_proyecto);
+        oci_bind_by_name($stmt_mp, ':nombre', $nombre);
+        oci_bind_by_name($stmt_mp, ':cant', $cant);
+        oci_bind_by_name($stmt_mp, ':unidad', $unidad);
+        oci_bind_by_name($stmt_mp, ':costo', $costo);
+        oci_execute($stmt_mp);
     }
-    $stmt_mp->close();
+    oci_free_statement($stmt_mp);
 }
 
 if (!empty($datos['gastos_admin'])) {
-    $sql_ga = "INSERT INTO gastos_administrativos (fk_id_proyecto, concepto, monto_mensual) VALUES (?, ?, ?)";
-    $stmt_ga = $conexion->prepare($sql_ga);
+    $sql_ga = "INSERT INTO gastos_administrativos (fk_id_proyecto, concepto, monto_mensual) VALUES (:id, :concepto, :monto)";
+    $stmt_ga = oci_parse($conexion, $sql_ga);
     foreach ($datos['gastos_admin'] as $gasto) {
-        $stmt_ga->bind_param("isd", $id_proyecto, $gasto['concepto'], $gasto['monto_mensual']);
-        $stmt_ga->execute();
+        $concepto = $gasto['concepto']; $monto = $gasto['monto_mensual'];
+        oci_bind_by_name($stmt_ga, ':id', $id_proyecto);
+        oci_bind_by_name($stmt_ga, ':concepto', $concepto);
+        oci_bind_by_name($stmt_ga, ':monto', $monto);
+        oci_execute($stmt_ga);
     }
-    $stmt_ga->close();
+    oci_free_statement($stmt_ga);
 }
 
 if (!empty($datos['gastos_ventas'])) {
-    $sql_gv = "INSERT INTO gastos_ventas (fk_id_proyecto, concepto, porcentaje_sobre_ventas) VALUES (?, ?, ?)";
-    $stmt_gv = $conexion->prepare($sql_gv);
+    $sql_gv = "INSERT INTO gastos_ventas (fk_id_proyecto, concepto, porcentaje_sobre_ventas) VALUES (:id, :concepto, :pct)";
+    $stmt_gv = oci_parse($conexion, $sql_gv);
     foreach ($datos['gastos_ventas'] as $gasto) {
-        $stmt_gv->bind_param("isd", $id_proyecto, $gasto['concepto'], $gasto['porcentaje_sobre_ventas']);
-        $stmt_gv->execute();
+        $concepto = $gasto['concepto']; $pct = $gasto['porcentaje_sobre_ventas'];
+        oci_bind_by_name($stmt_gv, ':id', $id_proyecto);
+        oci_bind_by_name($stmt_gv, ':concepto', $concepto);
+        oci_bind_by_name($stmt_gv, ':pct', $pct);
+        oci_execute($stmt_gv);
     }
-    $stmt_gv->close();
+    oci_free_statement($stmt_gv);
 }
 
-
 if (!empty($datos['gastos_fijos'])) {
-    $sql = "INSERT INTO gastos_indirectos_fijos (fk_id_proyecto, concepto, monto_anual) VALUES (?, ?, ?)";
-    $stmt = $conexion->prepare($sql);
+    $sql_gf = "INSERT INTO gastos_indirectos_fijos (fk_id_proyecto, concepto, monto_anual) VALUES (:id, :concepto, :monto)";
+    $stmt_gf = oci_parse($conexion, $sql_gf);
     foreach ($datos['gastos_fijos'] as $gasto) {
-        $stmt->bind_param("isd", $id_proyecto, $gasto['concepto'], $gasto['monto_anual']);
-        $stmt->execute();
+        $concepto = $gasto['concepto']; $monto = $gasto['monto_anual'];
+        oci_bind_by_name($stmt_gf, ':id', $id_proyecto);
+        oci_bind_by_name($stmt_gf, ':concepto', $concepto);
+        oci_bind_by_name($stmt_gf, ':monto', $monto);
+        oci_execute($stmt_gf);
     }
-    $stmt->close();
+    oci_free_statement($stmt_gf);
 }
 
 if (!empty($datos['gastos_variables'])) {
-    $sql = "INSERT INTO gastos_indirectos_variables (fk_id_proyecto, concepto, por_unidad, unidad) VALUES (?, ?, ?, ?)";
-    $stmt = $conexion->prepare($sql);
+    $sql_gva = "INSERT INTO gastos_indirectos_variables (fk_id_proyecto, concepto, por_unidad, unidad) VALUES (:id, :concepto, :por_unidad, :unidad)";
+    $stmt_gva = oci_parse($conexion, $sql_gva);
     foreach ($datos['gastos_variables'] as $gasto) {
-        $stmt->bind_param("isds", $id_proyecto, $gasto['concepto'], $gasto['por_unidad'], $gasto['unidad']);
-        $stmt->execute();
+        $concepto = $gasto['concepto']; $pu = $gasto['por_unidad']; $uni = $gasto['unidad'];
+        oci_bind_by_name($stmt_gva, ':id', $id_proyecto);
+        oci_bind_by_name($stmt_gva, ':concepto', $concepto);
+        oci_bind_by_name($stmt_gva, ':por_unidad', $pu);
+        oci_bind_by_name($stmt_gva, ':unidad', $uni);
+        oci_execute($stmt_gva);
     }
-    $stmt->close();
+    oci_free_statement($stmt_gva);
 }
 
 header('Content-Type: application/json');
-// Devolvemos el ID del proyecto y un mensaje de éxito
 echo json_encode(['status' => 'success', 'message' => 'Proyecto guardado correctamente.', 'id_proyecto' => $id_proyecto]);
-$conexion->close();
+oci_close($conexion);
 ?>

@@ -1,0 +1,10 @@
+# Ignorar dependencias de PHP
+/vendor/
+composer.phar
+
+# Ignorar la base de datos de Oracle (¡súper importante!)
+/oracle-data/
+
+# Ignorar archivos del sistema operativo
+.DS_Store
+Thumbs.db

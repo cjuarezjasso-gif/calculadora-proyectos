@@ -29,12 +29,12 @@
         </div>
     </div>
     <header class="bg-white shadow-lg border-b-4 border-indigo-500">
-        <div class="max-w-7xl mx-auto px-4 py-6">
-            <h1 class="text-3xl font-bold text-gray-800 text-center">
-                Análisis Financiero de Proyectos
-            </h1>
-            <p class="text-center text-gray-600 mt-2">Guía paso a paso para la proyección y valuación de tu negocio</p>
-        </div>
+        <div id="recuadro-titulo" class="max-w-7xl mx-auto px-4 py-6 transition-all duration-500 overflow-hidden max-h-40 opacity-100">
+    <h1 class="text-3xl font-bold text-gray-800 text-center">
+        Análisis Financiero de Proyectos
+    </h1>
+    <p class="text-center text-gray-600 mt-2">Guía paso a paso para la proyección y valuación de tu negocio</p>
+</div>
         
         <div class="bg-indigo-600 text-white p-2 text-center text-sm flex justify-center items-center space-x-4">
             <span id="status-socket" class="w-3 h-3 bg-red-500 rounded-full" title="Desconectado"></span>
@@ -55,31 +55,36 @@
     </header>
 
     <nav class="bg-white shadow-md sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4">
+    <button onclick="togglePestanas()" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold py-1 flex justify-center items-center gap-2 cursor-pointer border-b border-indigo-200 transition-colors">
+        <span>📂 Mostrar / Ocultar Pestañas</span>
+        <span id="icono-pestanas">▼</span>
+    </button>
+
+    <div id="contenedor-pestanas" class="max-w-7xl mx-auto px-4 overflow-hidden transition-all duration-500 max-h-[500px] opacity-100">
         
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2 py-4">
-            
-            <button class="nav-button px-3 py-2 rounded-lg text-sm active" onclick="showTab('plan')">Mercado Meta</button>
-            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('fact-sensibil')">Proyección Ventas</button>
-            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-vtas')">Ingresos</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm active" onclick="showTab('plan'); togglePestanas()">Mercado Meta</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('fact-sensibil'); togglePestanas()">Proyección Ventas</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-vtas'); togglePestanas()">Ingresos</button>
 
-            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-prod')">Producción</button>
-            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-mtp')">Materia Prima</button>
-            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-comp-mp')">Compras MP</button>
-            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-mo')">Mano Obra</button>
-            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-gts-i')">Gastos Indirectos</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-prod'); togglePestanas()">Producción</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-mtp'); togglePestanas()">Materia Prima</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-comp-mp'); togglePestanas()">Compras MP</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-mo'); togglePestanas()">Mano Obra</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-gts-i'); togglePestanas()">Gastos Indirectos</button>
 
-            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('inversiones')">Inversiones</button>
-            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-sts-oper')">Gastos Operación</button>
-            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('condiciones')">Condiciones</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('inversiones'); togglePestanas()">Inversiones</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('ppto-sts-oper'); togglePestanas()">Gastos Operación</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('condiciones'); togglePestanas()">Condiciones</button>
             
-            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('cto-prod')">Costo Vendido</button>
-            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('valuacion-inv')">Valuación Inv.</button>
-            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('estado-resultados-tab')">Estado Resultados</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('cto-prod'); togglePestanas()">Costo Vendido</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('valuacion-inv'); togglePestanas()">Valuación Inv.</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('estado-resultados-tab'); togglePestanas()">Estado Resultados</button>
             
-            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('fe')">Flujo Efectivo</button>
-            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('estado-situacion-tab')">Balance</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('fe'); togglePestanas()">Flujo Efectivo</button>
+            <button class="nav-button px-3 py-2 rounded-lg text-sm" onclick="showTab('estado-situacion-tab'); togglePestanas()">Balance</button>
         </div>
+
     </div>
 </nav>
 
@@ -625,8 +630,19 @@
 
     </main>
 
+    </main>
+
+    <div id="btn-flotante-actualizar" class="fixed bottom-6 left-6 z-40" style="display: none;">
+        <button onclick="guardarProyecto()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-all duration-200 hover:scale-105 flex items-center gap-2" title="Actualizar Proyecto Abierto">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+            </svg>
+            Actualizar Proyecto
+        </button>
+    </div>
+
     <div class="fixed bottom-6 right-6 space-y-3 z-40 flex flex-col items-center">
-        
         <button onclick="mostrarGraficos()" class="bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110" title="Ver Gráficos de Rentabilidad">
             📈
         </button>    
@@ -637,6 +653,7 @@
             🖨️
         </button>
     </div>
+
     <div id="modal-graficos" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[100] hidden items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col overflow-hidden relative">
             

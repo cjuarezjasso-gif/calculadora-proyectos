@@ -1,62 +1,51 @@
-version: '3.8' # (Puedes borrar esta línea si quieres)
+version: '3.8'
 
 services:
+  # 1. TU SERVIDOR WEB (PHP + Apache)
   web:
-    build: .  # <-- Esto le dice que use el Dockerfile
+    build: .
     container_name: apache_calculadora
-    restart: unless-stopped
     ports:
-      - "8080:80"
-      - "8081:8081"
-    
+      - "8080:80"     # Puerto para la página web
+      - "8081:8081"   # Puerto para los Sockets
     volumes:
-      # --- ¡VOLVEMOS A VINCULAR TUS ARCHIVOS! ---
-      # Si editas un archivo en VS Code, el contenedor lo verá al instante.
-      - ./api:/var/www/html/api
-      - ./js:/var/www/html/js
-      - ./style:/var/www/html/style
-      - ./bin:/var/www/html/bin
-      - ./index.html:/var/www/html/index.html
-      
-      # --- ESTO ES NUEVO ---
-      # Guardamos la carpeta 'vendor' para no tener que reinstalarla
-      - vendor-data:/var/www/html/vendor
-      
+      - .:/var/www/html
+    networks:
+      - mi_red
     depends_on:
       - db
 
+  # 2. LA NUEVA BASE DE DATOS (ORACLE XE)
   db:
-    # (El servicio 'db' no cambia, déjalo como estaba)
-    image: mysql:8.0
-    container_name: mysql_calculadora
-    command: --default-authentication-plugin=mysql_native_password
+    image: gvenzl/oracle-xe:21-slim
+    container_name: oracle_db
     environment:
-      MYSQL_ROOT_PASSWORD: 'admin1234'
-      MYSQL_DATABASE: 'analisis_financiero_db'
+      ORACLE_PASSWORD: admin1234
+      APP_USER: usuario_finanzas
+      APP_USER_PASSWORD: admin1234
     ports:
-      - "3307:3306"
+      - "1521:1521"
     volumes:
-      - mysql-data:/var/lib/mysql
-  
-  # -----------------------------------------------
-  # SERVICIO NUEVO: Respaldo Automático (Cron)
-  # -----------------------------------------------
-  cron_backup:
-    image: alpine:3.19
-    container_name: sistema_respaldos
-    depends_on:
-      - db
-    volumes:
-      # Conectamos la carpeta de tu compu con la del contenedor
-      - ./backups:/backups
-    # Este comando instala el cliente MySQL y programa la tarea cada 5 min
-    command: >
-      sh -c "apk add --no-cache mysql-client && 
-      echo '*/5 * * * * mysqldump -h db -u root -padmin1234 analisis_financiero_db > /backups/respaldo_$$(date +\%Y\%m\%d_\%H\%M\%S).sql' > /etc/crontabs/root && 
-      crond -f"
+      - oracle-data:/opt/oracle/oradata
+    networks:
+      - mi_red
 
-
+  # 3. EL ROBOT DE RESPALDOS (DESACTIVADO TEMPORALMENTE)
+  # Lo comentamos con # porque mysqldump no sirve para Oracle.
+  # cron_backup:
+  #   image: alpine:3.19
+  #   container_name: sistema_respaldos
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - ./backups:/backups
+  #   networks:
+  #     - mi_red
+  #   command: echo "Backup desactivado por migracion a Oracle"
 
 volumes:
-  mysql-data:
-  vendor-data: # <--- Volumen nuevo para las librerías
+  oracle-data:
+
+networks:
+  mi_red:
+    driver: bridge
