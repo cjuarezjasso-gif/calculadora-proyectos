@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso - Calculadora Financiera UAA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+
+    <div class="bg-white p-8 rounded-lg shadow-md w-96">
+        
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-blue-700">Calculadora Financiera</h1>
+            <p class="text-sm text-gray-500">Universidad Autónoma de Aguascalientes</p>
+        </div>
+
+        <div id="form-login">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">Iniciar Sesión</h2>
+            <form onsubmit="iniciarSesion(event)">
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-600 mb-1">Correo Electrónico</label>
+                    <input type="email" id="login-correo" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm text-gray-600 mb-1">Contraseña</label>
+                    <input type="password" id="login-password" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 transition">Entrar al Sistema</button>
+            </form>
+            <div class="text-center mt-4">
+                <a href="#" onclick="toggleFormularios()" class="text-sm text-blue-500 hover:underline">¿No tienes cuenta? Regístrate aquí</a>
+            </div>
+        </div>
+
+        <div id="form-registro" class="hidden">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">Crear Nueva Cuenta</h2>
+            <form onsubmit="registrarUsuario(event)">
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-600 mb-1">Nombre Completo</label>
+                    <input type="text" id="reg-nombre" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-600 mb-1">Correo Institucional</label>
+                    <input type="email" id="reg-correo" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm text-gray-600 mb-1">Crear Contraseña</label>
+                    <input type="password" id="reg-password" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white font-bold py-2 rounded hover:bg-green-700 transition">Registrarme</button>
+            </form>
+            <div class="text-center mt-4">
+                <a href="#" onclick="toggleFormularios()" class="text-sm text-gray-500 hover:underline">← Volver al Login</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Función para cambiar entre Iniciar Sesión y Registro
+        function toggleFormularios() {
+            const login = document.getElementById('form-login');
+            const registro = document.getElementById('form-registro');
+            login.classList.toggle('hidden');
+            registro.classList.toggle('hidden');
+        }
+
+        // Función para enviar los datos de REGISTRO
+        function registrarUsuario(e) {
+            e.preventDefault(); // Evita que la página recargue
+            
+            const datos = {
+                nombre: document.getElementById('reg-nombre').value,
+                correo: document.getElementById('reg-correo').value,
+                password: document.getElementById('reg-password').value
+            };
+
+            fetch('api/registro.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    alert('¡Cuenta creada con éxito! Ahora puedes iniciar sesión.');
+                    toggleFormularios(); // Regresamos a la pantalla de login
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Función para enviar los datos de LOGIN
+        function iniciarSesion(e) {
+            e.preventDefault();
+            
+            const datos = {
+                correo: document.getElementById('login-correo').value,
+                password: document.getElementById('login-password').value
+            };
+
+            fetch('api/login.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    // ✨ AQUÍ AGREGAMOS LA LLAVE MÁGICA ✨
+                    localStorage.setItem('sesion_activa', 'true');
+                    
+                    // Si el guardia de seguridad dice que todo está bien, pasamos a la app
+                    window.location.href = 'index.html'; 
+                } else {
+                    alert('Acceso denegado: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
