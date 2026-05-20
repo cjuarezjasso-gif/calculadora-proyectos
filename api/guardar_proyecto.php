@@ -26,7 +26,8 @@ $campos = [
     'inv_final_a1', 'inv_final_a2', 'inv_final_a3', 'inv_final_a4', 'inv_final_a5', 
     'inv_inicial_mp', 'inv_final_mp_pct', 'tiempo_unidad_mo', 'costo_hora_mo',
     'inversion_inicial', 'inflacion_anual',
-    'saldo_inicial', 'pct_cobro_efectivo'
+    'saldo_inicial', 'pct_cobro_efectivo',
+    'ind_monto_deuda', 'ind_tasa_deuda', 'ind_tasa_socios', 'ind_tasa_impuestos', 'ind_plazo_credito'
 ];
 
 // Arreglo temporal para guardar las variables y que Oracle pueda leerlas
