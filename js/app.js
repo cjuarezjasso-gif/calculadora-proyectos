@@ -931,7 +931,7 @@ function guardarProyecto() {
         dias_credito_ventas: document.getElementById('dias-credito-ventas').value,
         dias_credito_compras: document.getElementById('dias-credito-compras').value,
         descuento_pronto_pago: document.getElementById('descuento-pronto-pago').value,
-        inv_inicial_prod: document.getElementById('inv-inicial-prod').value,
+        inv_inicial_prod: document.getElementById('inv-inicial-pt').value,
         inv_final_a1: document.getElementById('inv-final-1').value,
         inv_final_a2: document.getElementById('inv-final-2').value,
         inv_final_a3: document.getElementById('inv-final-3').value,
@@ -1143,7 +1143,7 @@ function cargarProyecto(id) {
             document.getElementById('descuento-pronto-pago').value = datos.descuento_pronto_pago;
 
             // Pestaña 6
-            document.getElementById('inv-inicial-prod').value = datos.inv_inicial_prod;
+            document.getElementById('inv-inicial-pt').value = datos.inv_inicial_prod;
             document.getElementById('inv-final-1').value = datos.inv_final_a1;
             document.getElementById('inv-final-2').value = datos.inv_final_a2;
             document.getElementById('inv-final-3').value = datos.inv_final_a3;
