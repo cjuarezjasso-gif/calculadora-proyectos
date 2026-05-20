@@ -24,7 +24,7 @@ oci_bind_by_name($stmt, ':nombre', $nombre);
 oci_bind_by_name($stmt, ':correo', $correo);
 oci_bind_by_name($stmt, ':pass', $pass_hashed);
 
-if (@oci_execute($stmt)) {
+if (@oci_execute($stmt, OCI_COMMIT_ON_SUCCESS)) {
     echo json_encode(['status' => 'success', 'message' => 'Usuario registrado exitosamente']);
 } else {
     // Si el correo ya existe, Oracle manda un error y lo cachamos aquí

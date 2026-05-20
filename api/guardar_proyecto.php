@@ -55,7 +55,7 @@ if (empty($id_proyecto)) {
     $nuevo_id = 0;
     oci_bind_by_name($stmt, ':id_generado', $nuevo_id, -1, SQLT_INT);
     
-    oci_execute($stmt);
+    oci_execute($stmt, OCI_COMMIT_ON_SUCCESS);
     $id_proyecto = $nuevo_id; 
     oci_free_statement($stmt);
     
@@ -77,7 +77,7 @@ if (empty($id_proyecto)) {
     }
     oci_bind_by_name($stmt, ':id_proyecto', $id_proyecto);
     
-    oci_execute($stmt);
+    oci_execute($stmt, OCI_COMMIT_ON_SUCCESS);
     oci_free_statement($stmt);
     
     // Lógica para borrar detalles viejos optimizada para Oracle
@@ -86,7 +86,7 @@ if (empty($id_proyecto)) {
         $sql_del = "DELETE FROM $tabla WHERE fk_id_proyecto = :id";
         $stmt_del = oci_parse($conexion, $sql_del);
         oci_bind_by_name($stmt_del, ':id', $id_proyecto);
-        oci_execute($stmt_del);
+        oci_execute($stmt_del, OCI_COMMIT_ON_SUCCESS);
         oci_free_statement($stmt_del);
     }
 }
@@ -103,7 +103,7 @@ if (!empty($datos['inversiones'])) {
         oci_bind_by_name($stmt_inversion, ':monto', $monto);
         oci_bind_by_name($stmt_inversion, ':vida', $vida);
         oci_bind_by_name($stmt_inversion, ':metodo', $metodo);
-        oci_execute($stmt_inversion);
+        oci_execute($stmt_inversion, OCI_COMMIT_ON_SUCCESS);
     }
     oci_free_statement($stmt_inversion);
 }
@@ -118,7 +118,7 @@ if (!empty($datos['materias_primas'])) {
         oci_bind_by_name($stmt_mp, ':cant', $cant);
         oci_bind_by_name($stmt_mp, ':unidad', $unidad);
         oci_bind_by_name($stmt_mp, ':costo', $costo);
-        oci_execute($stmt_mp);
+        oci_execute($stmt_mp, OCI_COMMIT_ON_SUCCESS);
     }
     oci_free_statement($stmt_mp);
 }
@@ -131,7 +131,7 @@ if (!empty($datos['gastos_admin'])) {
         oci_bind_by_name($stmt_ga, ':id', $id_proyecto);
         oci_bind_by_name($stmt_ga, ':concepto', $concepto);
         oci_bind_by_name($stmt_ga, ':monto', $monto);
-        oci_execute($stmt_ga);
+        oci_execute($stmt_ga, OCI_COMMIT_ON_SUCCESS);
     }
     oci_free_statement($stmt_ga);
 }
@@ -144,7 +144,7 @@ if (!empty($datos['gastos_ventas'])) {
         oci_bind_by_name($stmt_gv, ':id', $id_proyecto);
         oci_bind_by_name($stmt_gv, ':concepto', $concepto);
         oci_bind_by_name($stmt_gv, ':pct', $pct);
-        oci_execute($stmt_gv);
+        oci_execute($stmt_gv, OCI_COMMIT_ON_SUCCESS);
     }
     oci_free_statement($stmt_gv);
 }
@@ -157,7 +157,7 @@ if (!empty($datos['gastos_fijos'])) {
         oci_bind_by_name($stmt_gf, ':id', $id_proyecto);
         oci_bind_by_name($stmt_gf, ':concepto', $concepto);
         oci_bind_by_name($stmt_gf, ':monto', $monto);
-        oci_execute($stmt_gf);
+        oci_execute($stmt_gf, OCI_COMMIT_ON_SUCCESS);
     }
     oci_free_statement($stmt_gf);
 }
@@ -171,7 +171,7 @@ if (!empty($datos['gastos_variables'])) {
         oci_bind_by_name($stmt_gva, ':concepto', $concepto);
         oci_bind_by_name($stmt_gva, ':por_unidad', $pu);
         oci_bind_by_name($stmt_gva, ':unidad', $uni);
-        oci_execute($stmt_gva);
+        oci_execute($stmt_gva, OCI_COMMIT_ON_SUCCESS);
     }
     oci_free_statement($stmt_gva);
 }
