@@ -341,7 +341,7 @@ function actualizarCostosMP(materiasPrimasCargadas = null) {
         
         // Solo si estamos cargando un proyecto guardado (materiasPrimasCargadas), sobrescribimos con ese dato
         if(materiasPrimasCargadas) {
-            const mpCargada = materiasPrimasCargadas.find(m => m.nombre_mp === mp.nombre);
+            const mpCargada = materiasPrimasCargadas.find(m => m.nombre_mp === mp.nombre || m.nombre_mp === mp.nombre_mp);
             if(mpCargada) { 
                 costo = mpCargada.costo_unitario; 
             }
@@ -1022,6 +1022,11 @@ function guardarProyecto() {
     });
     datosDelProyecto.gastos_variables = gastosVariables;
 
+    datosDelProyecto.ind_monto_deuda    = parseFloat(document.getElementById('ind-monto-deuda')?.value)    || 0;
+    datosDelProyecto.ind_tasa_deuda     = parseFloat(document.getElementById('ind-tasa-deuda')?.value)     || 0;
+    datosDelProyecto.ind_tasa_socios    = parseFloat(document.getElementById('ind-tasa-socios')?.value)    || 0;
+    datosDelProyecto.ind_tasa_impuestos = parseFloat(document.getElementById('ind-tasa-impuestos')?.value) || 30;
+    datosDelProyecto.ind_plazo_credito  = parseInt(document.getElementById('ind-plazo-credito')?.value)    || 0;
     console.log("Datos que se enviarán al servidor:", datosDelProyecto);
 
     // PARTE 3: Envía todo al backend
@@ -1217,6 +1222,16 @@ function cargarProyecto(id) {
             // Pestaña 5
             calcularInversiones(); 
             
+            // Pestaña 5b - Recarga MP en globalData
+            calcularPptoMtp();
+
+            // Cargar indicadores financieros
+            if (datos.ind_monto_deuda) document.getElementById('ind-monto-deuda').value = datos.ind_monto_deuda;
+            if (datos.ind_tasa_deuda) document.getElementById('ind-tasa-deuda').value = datos.ind_tasa_deuda;
+            if (datos.ind_tasa_socios) document.getElementById('ind-tasa-socios').value = datos.ind_tasa_socios;
+            if (datos.ind_tasa_impuestos) document.getElementById('ind-tasa-impuestos').value = datos.ind_tasa_impuestos;
+            if (datos.ind_plazo_credito) document.getElementById('ind-plazo-credito').value = datos.ind_plazo_credito;
+
             // Pestaña 8 (Costos de MP)
             // 1. Actualiza los costos unitarios con los datos cargados
             actualizarCostosMP(datos.materias_primas);
