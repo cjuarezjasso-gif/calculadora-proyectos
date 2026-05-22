@@ -1322,7 +1322,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function iniciarSocket() {
     if (conn) conn.close();
-    ws://18.218.15.145:8081
+    conn = new WebSocket('ws://18.218.15.145:8081');
 
     conn.onopen = function(e) {
         console.log("✅ Conexión establecida con el Socket!");
