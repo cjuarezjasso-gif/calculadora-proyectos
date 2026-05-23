@@ -931,7 +931,8 @@ function guardarProyecto() {
         dias_credito_ventas: document.getElementById('dias-credito-ventas').value,
         dias_credito_compras: document.getElementById('dias-credito-compras').value,
         descuento_pronto_pago: document.getElementById('descuento-pronto-pago').value,
-        inv_inicial_prod: document.getElementById('inv-inicial-pt').value,
+        inv_inicial_prod: document.getElementById('inv-inicial-prod').value,
+        inv_inicial_pt_val: document.getElementById('inv-inicial-pt')?.value || 0,
         inv_final_a1: document.getElementById('inv-final-1').value,
         inv_final_a2: document.getElementById('inv-final-2').value,
         inv_final_a3: document.getElementById('inv-final-3').value,
@@ -981,9 +982,11 @@ function guardarProyecto() {
     datosDelProyecto.materias_primas = materiasPrimas;
 
     const gastosAdmin = [];
-    document.querySelectorAll('#gastos-admin-container .gasto-admin-item').forEach(fila => {
-        const concepto = fila.querySelector('.gasto-admin-concepto').value;
-        const monto = fila.querySelector('.gasto-admin-monto').value;
+    const gastosAdminConceptos = document.querySelectorAll('#gastos-admin-container .gasto-admin-concepto');
+    const gastosAdminMontos = document.querySelectorAll('#gastos-admin-container .gasto-admin-monto');
+    gastosAdminConceptos.forEach((el, i) => {
+        const concepto = el.value;
+        const monto = gastosAdminMontos[i] ? gastosAdminMontos[i].value : 0;
         if (concepto && monto) {
             gastosAdmin.push({ concepto, monto_mensual: monto });
         }
@@ -991,9 +994,11 @@ function guardarProyecto() {
     datosDelProyecto.gastos_admin = gastosAdmin;
 
     const gastosVentas = [];
-    document.querySelectorAll('#gastos-ventas-container .gasto-ventas-item').forEach(fila => {
-        const concepto = fila.querySelector('.gasto-ventas-concepto').value;
-        const porcentaje = fila.querySelector('.gasto-ventas-pct').value;
+    const gastosVentasConceptos = document.querySelectorAll('#gastos-ventas-container .gasto-ventas-concepto');
+    const gastosVentasPcts = document.querySelectorAll('#gastos-ventas-container .gasto-ventas-pct');
+    gastosVentasConceptos.forEach((el, i) => {
+        const concepto = el.value;
+        const porcentaje = gastosVentasPcts[i] ? gastosVentasPcts[i].value : 0;
         if (concepto && porcentaje) {
             gastosVentas.push({ concepto, porcentaje_sobre_ventas: porcentaje });
         }
@@ -1143,7 +1148,8 @@ function cargarProyecto(id) {
             document.getElementById('descuento-pronto-pago').value = datos.descuento_pronto_pago;
 
             // Pestaña 6
-            document.getElementById('inv-inicial-pt').value = datos.inv_inicial_prod;
+            document.getElementById('inv-inicial-prod').value = datos.inv_inicial_prod;
+            if (datos.inv_inicial_pt_val && document.getElementById('inv-inicial-pt')) document.getElementById('inv-inicial-pt').value = datos.inv_inicial_pt_val;
             document.getElementById('inv-final-1').value = datos.inv_final_a1;
             document.getElementById('inv-final-2').value = datos.inv_final_a2;
             document.getElementById('inv-final-3').value = datos.inv_final_a3;
