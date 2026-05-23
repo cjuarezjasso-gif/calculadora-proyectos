@@ -341,7 +341,7 @@ function actualizarCostosMP(materiasPrimasCargadas = null) {
         
         // Solo si estamos cargando un proyecto guardado (materiasPrimasCargadas), sobrescribimos con ese dato
         if(materiasPrimasCargadas) {
-            const mpCargada = materiasPrimasCargadas.find(m => m.nombre_mp === mp.nombre);
+            const mpCargada = materiasPrimasCargadas.find(m => m.nombre_mp === mp.nombre || m.nombre_mp === mp.nombre_mp);
             if(mpCargada) { 
                 costo = mpCargada.costo_unitario; 
             }
@@ -931,7 +931,7 @@ function guardarProyecto() {
         dias_credito_ventas: document.getElementById('dias-credito-ventas').value,
         dias_credito_compras: document.getElementById('dias-credito-compras').value,
         descuento_pronto_pago: document.getElementById('descuento-pronto-pago').value,
-        inv_inicial_prod: document.getElementById('inv-inicial-prod').value,
+        inv_inicial_prod: document.getElementById('inv-inicial-pt').value,
         inv_final_a1: document.getElementById('inv-final-1').value,
         inv_final_a2: document.getElementById('inv-final-2').value,
         inv_final_a3: document.getElementById('inv-final-3').value,
@@ -1022,6 +1022,11 @@ function guardarProyecto() {
     });
     datosDelProyecto.gastos_variables = gastosVariables;
 
+    datosDelProyecto.ind_monto_deuda    = parseFloat(document.getElementById('ind-monto-deuda')?.value)    || 0;
+    datosDelProyecto.ind_tasa_deuda     = parseFloat(document.getElementById('ind-tasa-deuda')?.value)     || 0;
+    datosDelProyecto.ind_tasa_socios    = parseFloat(document.getElementById('ind-tasa-socios')?.value)    || 0;
+    datosDelProyecto.ind_tasa_impuestos = parseFloat(document.getElementById('ind-tasa-impuestos')?.value) || 30;
+    datosDelProyecto.ind_plazo_credito  = parseInt(document.getElementById('ind-plazo-credito')?.value)    || 0;
     console.log("Datos que se enviarán al servidor:", datosDelProyecto);
 
     // PARTE 3: Envía todo al backend
@@ -1138,7 +1143,7 @@ function cargarProyecto(id) {
             document.getElementById('descuento-pronto-pago').value = datos.descuento_pronto_pago;
 
             // Pestaña 6
-            document.getElementById('inv-inicial-prod').value = datos.inv_inicial_prod;
+            document.getElementById('inv-inicial-pt').value = datos.inv_inicial_prod;
             document.getElementById('inv-final-1').value = datos.inv_final_a1;
             document.getElementById('inv-final-2').value = datos.inv_final_a2;
             document.getElementById('inv-final-3').value = datos.inv_final_a3;
@@ -1217,6 +1222,13 @@ function cargarProyecto(id) {
             // Pestaña 5
             calcularInversiones(); 
             
+            // Cargar indicadores financieros
+            if (datos.ind_monto_deuda !== undefined && document.getElementById('ind-monto-deuda')) document.getElementById('ind-monto-deuda').value = datos.ind_monto_deuda;
+            if (datos.ind_tasa_deuda !== undefined && document.getElementById('ind-tasa-deuda')) document.getElementById('ind-tasa-deuda').value = datos.ind_tasa_deuda;
+            if (datos.ind_tasa_socios !== undefined && document.getElementById('ind-tasa-socios')) document.getElementById('ind-tasa-socios').value = datos.ind_tasa_socios;
+            if (datos.ind_tasa_impuestos !== undefined && document.getElementById('ind-tasa-impuestos')) document.getElementById('ind-tasa-impuestos').value = datos.ind_tasa_impuestos;
+            if (datos.ind_plazo_credito !== undefined && document.getElementById('ind-plazo-credito')) document.getElementById('ind-plazo-credito').value = datos.ind_plazo_credito;
+
             // Pestaña 8 (Costos de MP)
             // 1. Actualiza los costos unitarios con los datos cargados
             actualizarCostosMP(datos.materias_primas);
@@ -1322,7 +1334,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function iniciarSocket() {
     if (conn) conn.close();
-    conn = new WebSocket('ws://18.218.15.145:8081');
+    conn = new WebSocket('ws://18.225.224.77:8081');
 
     conn.onopen = function(e) {
         console.log("✅ Conexión establecida con el Socket!");
@@ -1698,4 +1710,55 @@ function mostrarAlertaMoneda(tipoMoneda) {
 // Función para cerrar el cuadro
 function cerrarModalNotificacion() {
     document.getElementById('modal-notificacion-moneda').classList.add('hidden');
+}
+function calcularIndicadoresFinancieros() {
+    const inversionInicial  = parseFloat(document.getElementById('inversion-inicial')?.value) || 0;
+    const montoDeuda        = parseFloat(document.getElementById('ind-monto-deuda')?.value)   || 0;
+    const tasaDeuda         = parseFloat(document.getElementById('ind-tasa-deuda')?.value)    || 0;
+    const tasaSocios        = parseFloat(document.getElementById('ind-tasa-socios')?.value)   || 0;
+    const tasaImpuestos     = parseFloat(document.getElementById('ind-tasa-impuestos')?.value)|| 30;
+    const plazoCredito      = parseInt(document.getElementById('ind-plazo-credito')?.value)   || 0;
+    const aportacionSocios  = inversionInicial - montoDeuda;
+    const fmt = (v) => v.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+    const pct = (v) => v.toFixed(2) + '%';
+    const V = inversionInicial, E = aportacionSocios, D = montoDeuda;
+    const Ke = tasaSocios/100, Kd = tasaDeuda/100, t = tasaImpuestos/100;
+    const wacc = V > 0 ? ((E/V)*Ke) + ((D/V)*Kd*(1-t)) : 0;
+    const flujos = [];
+    for (let a = 0; a < 5; a++) {
+        flujos.push((globalData.utilidadNeta?.[a]||0)+(globalData.depreciacion?.[a]||0)+(globalData.amortizacion?.[a]||0));
+    }
+    let vpn = -inversionInicial;
+    for (let a = 0; a < 5; a++) vpn += flujos[a] / Math.pow(1+wacc, a+1);
+    function calcVPN(tasa) { let v=-inversionInicial; for(let a=0;a<5;a++) v+=flujos[a]/Math.pow(1+tasa,a+1); return v; }
+    let tir=null, tirTasa=0.1;
+    for(let i=0;i<1000;i++){const f=calcVPN(tirTasa),df=calcVPN(tirTasa+0.0001),d=(df-f)/0.0001;if(Math.abs(d)<1e-12)break;const n=tirTasa-f/d;if(Math.abs(n-tirTasa)<1e-8){tirTasa=n;tir=tirTasa;break;}tirTasa=n;if(tirTasa<-0.9999)break;}
+    let acum=-inversionInicial, priTexto='No se recupera en 5 años';
+    for(let a=0;a<5;a++){const ant=acum;acum+=flujos[a];if(acum>=0&&priTexto==='No se recupera en 5 años'){const frac=(-ant)/flujos[a];const mes=Math.ceil(frac*12);priTexto=`${a} año${a!==1?'s':''} y ${mes} mes${mes!==1?'es':''}`; break;}}
+    let vpB=0, vpC=inversionInicial;
+    for(let a=0;a<5;a++){vpB+=(globalData.ventasProyeccion?.[a]||0)/Math.pow(1+wacc,a+1);vpC+=((globalData.costoVendido?.[a]||0)+(globalData.gastosOperacion?.[a]||0))/Math.pow(1+wacc,a+1);}
+    const bc = vpC>0?vpB/vpC:0;
+    const esViable = vpn>0&&(tir===null||tir>wacc)&&bc>1;
+    const colorVPN = vpn>=0?'text-green-700':'text-red-700';
+    const colorTIR = (tir!==null&&tir>wacc)?'text-green-700':'text-red-700';
+    const colorBC  = bc>=1?'text-green-700':'text-red-700';
+    let tablaAmort = '';
+    if(montoDeuda>0&&tasaDeuda>0&&plazoCredito>0){
+        const pagoCap=montoDeuda/plazoCredito; let saldo=montoDeuda;
+        tablaAmort='<div class="overflow-x-auto mt-4"><table class="min-w-full text-sm"><thead class="table-header"><tr><th class="px-3 py-2">Año</th><th class="px-3 py-2">Saldo Inicial</th><th class="px-3 py-2">Pago Capital</th><th class="px-3 py-2">Interés</th><th class="px-3 py-2">Pago Total</th><th class="px-3 py-2">Saldo Final</th></tr></thead><tbody>';
+        for(let a=1;a<=plazoCredito;a++){const int=saldo*(tasaDeuda/100),pago=pagoCap+int,sf=saldo-pagoCap;tablaAmort+=`<tr class="table-row"><td class="px-3 py-2">Año ${a}</td><td class="px-3 py-2">${fmt(saldo)}</td><td class="px-3 py-2 text-red-600">${fmt(pagoCap)}</td><td class="px-3 py-2 text-orange-600">${fmt(int)}</td><td class="px-3 py-2 font-semibold">${fmt(pago)}</td><td class="px-3 py-2">${fmt(Math.max(0,sf))}</td></tr>`;saldo=sf;}
+        tablaAmort+='</tbody></table></div>';
+    } else { tablaAmort='<p class="text-gray-500 text-sm">Ingresa monto de deuda, tasa y plazo para ver la tabla.</p>'; }
+    document.getElementById('ind-resultado').innerHTML = `
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 text-center"><div class="text-xs text-indigo-500 font-semibold uppercase mb-1">WACC</div><div class="text-2xl font-bold text-indigo-700">${pct(wacc*100)}</div><div class="text-xs text-gray-500 mt-1">Costo promedio de capital</div></div>
+        <div class="bg-white border rounded-xl p-4 text-center shadow-sm"><div class="text-xs text-gray-500 font-semibold uppercase mb-1">VPN</div><div class="text-2xl font-bold ${colorVPN}">${fmt(vpn)}</div><div class="text-xs text-gray-500 mt-1">${vpn>=0?'✅ Viable':'❌ No viable'}</div></div>
+        <div class="bg-white border rounded-xl p-4 text-center shadow-sm"><div class="text-xs text-gray-500 font-semibold uppercase mb-1">TIR</div><div class="text-2xl font-bold ${colorTIR}">${tir!==null?pct(tir*100):'N/A'}</div><div class="text-xs text-gray-500 mt-1">${tir!==null?(tir>wacc?'✅ TIR > WACC':'❌ TIR < WACC'):'Flujos insuficientes'}</div></div>
+        <div class="bg-white border rounded-xl p-4 text-center shadow-sm"><div class="text-xs text-gray-500 font-semibold uppercase mb-1">B/C</div><div class="text-2xl font-bold ${colorBC}">${bc.toFixed(4)}</div><div class="text-xs text-gray-500 mt-1">${bc>=1?'✅ Genera valor':'❌ No cubre costos'}</div></div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4"><div class="text-sm font-bold text-yellow-700 mb-1">⏱ Tiempo de Recuperación (TRI)</div><div class="text-xl font-bold text-yellow-800">${priTexto}</div></div>
+        <div class="rounded-xl p-4 border ${esViable?'bg-green-50 border-green-200':'bg-red-50 border-red-200'}"><div class="text-sm font-bold ${esViable?'text-green-700':'text-red-700'} mb-1">${esViable?'✅ CONCLUSIÓN: Proyecto VIABLE':'❌ CONCLUSIÓN: Proyecto NO VIABLE'}</div><div class="text-xs text-gray-600">${esViable?'VPN positivo, TIR supera WACC y B/C mayor a 1.':'Algún indicador no es favorable. Revisar costos o financiamiento.'}</div></div>
+    </div>
+    <div><h3 class="font-bold text-gray-700 mb-3">🏦 Tabla de Amortización</h3>${tablaAmort}</div>`;
 }

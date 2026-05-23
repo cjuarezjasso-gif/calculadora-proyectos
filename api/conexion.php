@@ -3,7 +3,7 @@
 
 $username = 'usuario_finanzas'; 
 $password = 'admin1234';
-$database = '//oracle_db:1521/XE'; 
+$database = '//oracle_db:1521/XEPDB1'; 
 
 // Intentamos abrir la conexión con Oracle
 $conexion = @oci_pconnect($username, $password, $database, 'AL32UTF8');
