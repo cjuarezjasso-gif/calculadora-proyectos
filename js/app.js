@@ -590,85 +590,6 @@ function calcularValuacionInv() {
 }
 
 // PESTAÑA 14: ESTADO DE RESULTADOS
-function calcularEstadoResultados() {
-    let html = '<div class="overflow-x-auto"><table class="min-w-full text-sm"><thead class="table-header"><tr><th class="px-3 py-2">Concepto</th>';
-    for (let año = 1; año <= 5; año++) { html += `<th class="px-3 py-2">Año ${año}</th>`; }
-    html += '</tr></thead><tbody>';
-    
-    html += '<tr class="table-row bg-green-50"><td class="px-3 py-2 font-bold">INGRESOS</td>';
-    for (let año = 0; año < 5; año++) { 
-        const ingFmt = (globalData.ventasProyeccion[año] || 0).toLocaleString(culturaActual, {style: 'currency', currency: monedaActual});
-        html += `<td class="px-3 py-2 font-semibold text-green-600">${ingFmt}</td>`; 
-    }
-    html += '</tr>';
-    
-    html += '<tr class="table-row"><td class="px-3 py-2">(-) Costo de lo Vendido</td>';
-    for (let año = 0; año < 5; año++) { 
-        const costFmt = (globalData.costoVendido[año] || 0).toLocaleString(culturaActual, {style: 'currency', currency: monedaActual});
-        html += `<td class="px-3 py-2 text-red-600">${costFmt}</td>`; 
-    }
-    html += '</tr>';
-    
-    html += '<tr class="table-row bg-blue-50"><td class="px-3 py-2 font-bold">UTILIDAD BRUTA</td>';
-    let utilidadBruta = [];
-    for (let año = 0; año < 5; año++) {
-        const ub = (globalData.ventasProyeccion[año] || 0) - (globalData.costoVendido[año] || 0);
-        utilidadBruta[año] = ub;
-        const ubFmt = ub.toLocaleString(culturaActual, {style: 'currency', currency: monedaActual});
-        html += `<td class="px-3 py-2 font-semibold">${ubFmt}</td>`;
-    }
-    html += '</tr>';
-    
-    // ... (Resto de ERI simplificado con formato) ...
-    // Gastos Operacion
-    html += '<tr class="table-row"><td class="px-3 py-2">(-) Gastos de Operación</td>';
-    for(let a=0; a<5; a++) { 
-        const gastoFmt = (globalData.gastosOperacion[a]||0).toLocaleString(culturaActual, {style:'currency', currency:monedaActual});
-        html += `<td class="px-3 py-2 text-red-600">${gastoFmt}</td>`; 
-    }
-    html += '</tr>';
-
-    // Depreciacion
-    html += '<tr class="table-row"><td class="px-3 py-2">(-) Depreciación</td>';
-    for(let a=0; a<5; a++) { 
-        const depFmt = (globalData.depreciacion[a]||0).toLocaleString(culturaActual, {style:'currency', currency:monedaActual});
-        html += `<td class="px-3 py-2 text-red-600">${depFmt}</td>`; 
-    }
-    html += '</tr>';
-
-    // U. Operacion
-    html += '<tr class="table-row bg-yellow-50"><td class="px-3 py-2 font-bold">UTILIDAD DE OPERACIÓN</td>';
-    let utilidadOperacion = [];
-    for(let a=0; a<5; a++) {
-        const uo = utilidadBruta[a] - (globalData.gastosOperacion[a]||0) - (globalData.depreciacion[a]||0);
-        utilidadOperacion[a] = uo;
-        html += `<td class="px-3 py-2 font-semibold">${uo.toLocaleString(culturaActual, {style:'currency', currency:monedaActual})}</td>`;
-    }
-    html += '</tr>';
-
-    // ISR
-    html += '<tr class="table-row"><td class="px-3 py-2">(-) ISR (30%)</td>';
-    for(let a=0; a<5; a++) {
-        const isr = Math.max(0, utilidadOperacion[a] * 0.30);
-        html += `<td class="px-3 py-2 text-red-600">${isr.toLocaleString(culturaActual, {style:'currency', currency:monedaActual})}</td>`;
-    }
-    html += '</tr>';
-
-    // U. Neta
-    html += '<tr class="table-row bg-green-100"><td class="px-3 py-2 font-bold">UTILIDAD NETA</td>';
-    for(let a=0; a<5; a++) {
-        const isr = Math.max(0, utilidadOperacion[a] * 0.30);
-        const un = utilidadOperacion[a] - isr;
-        globalData.utilidadNeta[a] = un;
-        const colorClass = un >= 0 ? 'text-green-700' : 'text-red-700';
-        html += `<td class="px-3 py-2 font-bold ${colorClass}">${un.toLocaleString(culturaActual, {style:'currency', currency:monedaActual})}</td>`;
-    }
-    html += '</tr></tbody></table></div>';
-    document.getElementById('estado-resultados').innerHTML = html;
-    calcularEstadoSituacion();
-}
-
-// PESTAÑA 15: BALANCE (CORREGIDO Y CUADRADO AL 100%)
 function calcularEstadoSituacion() {
     const inversionInicial = parseFloat(document.getElementById('inversion-inicial').value) || 0;
     let html = '<div class="overflow-x-auto"><table class="min-w-full text-sm"><thead class="table-header"><tr><th class="px-3 py-2">Concepto</th>';
@@ -1767,4 +1688,128 @@ function calcularIndicadoresFinancieros() {
         <div class="rounded-xl p-4 border ${esViable?'bg-green-50 border-green-200':'bg-red-50 border-red-200'}"><div class="text-sm font-bold ${esViable?'text-green-700':'text-red-700'} mb-1">${esViable?'✅ CONCLUSIÓN: Proyecto VIABLE':'❌ CONCLUSIÓN: Proyecto NO VIABLE'}</div><div class="text-xs text-gray-600">${esViable?'VPN positivo, TIR supera WACC y B/C mayor a 1.':'Algún indicador no es favorable. Revisar costos o financiamiento.'}</div></div>
     </div>
     <div><h3 class="font-bold text-gray-700 mb-3">🏦 Tabla de Amortización</h3>${tablaAmort}</div>`;
+}
+
+function calcularEstadoResultados() {
+    const tasaISR = (parseFloat(document.getElementById('ind-tasa-impuestos')?.value) || 30) / 100;
+    const tasaPTU = 0.10;
+    const montoDeuda   = parseFloat(document.getElementById('ind-monto-deuda')?.value)   || 0;
+    const tasaDeuda    = parseFloat(document.getElementById('ind-tasa-deuda')?.value)     || 0;
+    const plazoCredito = parseInt(document.getElementById('ind-plazo-credito')?.value)    || 0;
+    const gastosFinancieros = [0,0,0,0,0];
+    if (montoDeuda > 0 && tasaDeuda > 0 && plazoCredito > 0) {
+        const pagoCap = montoDeuda / plazoCredito;
+        let saldo = montoDeuda;
+        for (let a = 0; a < Math.min(5, plazoCredito); a++) {
+            gastosFinancieros[a] = saldo * (tasaDeuda / 100);
+            saldo -= pagoCap;
+        }
+    }
+    const fmt = (v) => v.toLocaleString(culturaActual, {style: 'currency', currency: monedaActual});
+    const fmtColor = (v) => {
+        const color = v >= 0 ? 'text-green-700' : 'text-red-700';
+        return `<td class="px-3 py-2 font-semibold ${color}">${fmt(v)}</td>`;
+    };
+    let html = '<div class="overflow-x-auto"><table class="min-w-full text-sm"><thead class="table-header"><tr><th class="px-3 py-2">Concepto</th>';
+    for (let año = 1; año <= 5; año++) { html += `<th class="px-3 py-2">Año ${año}</th>`; }
+    html += '</tr></thead><tbody>';
+    html += '<tr class="table-row bg-green-50"><td class="px-3 py-2 font-bold">INGRESOS</td>';
+    for (let a = 0; a < 5; a++) html += `<td class="px-3 py-2 font-semibold text-green-600">${fmt(globalData.ventasProyeccion[a]||0)}</td>`;
+    html += '</tr>';
+    html += '<tr class="table-row"><td class="px-3 py-2">(-) Costo de lo Vendido</td>';
+    for (let a = 0; a < 5; a++) html += `<td class="px-3 py-2 text-red-600">${fmt(globalData.costoVendido[a]||0)}</td>`;
+    html += '</tr>';
+    const utilidadBruta = [];
+    html += '<tr class="table-row bg-blue-50"><td class="px-3 py-2 font-bold">UTILIDAD BRUTA</td>';
+    for (let a = 0; a < 5; a++) {
+        utilidadBruta[a] = (globalData.ventasProyeccion[a]||0) - (globalData.costoVendido[a]||0);
+        html += fmtColor(utilidadBruta[a]);
+    }
+    html += '</tr>';
+    html += '<tr class="table-row"><td class="px-3 py-2">(-) Gastos de Operacion</td>';
+    for (let a = 0; a < 5; a++) html += `<td class="px-3 py-2 text-red-600">${fmt(globalData.gastosOperacion[a]||0)}</td>`;
+    html += '</tr>';
+    html += '<tr class="table-row"><td class="px-3 py-2">(-) Depreciacion y Amortizacion</td>';
+    for (let a = 0; a < 5; a++) html += `<td class="px-3 py-2 text-red-600">${fmt(globalData.depreciacion[a]||0)}</td>`;
+    html += '</tr>';
+    const utilidadOperacion = [];
+    html += '<tr class="table-row bg-yellow-50"><td class="px-3 py-2 font-bold">UTILIDAD DE OPERACION (UAII)</td>';
+    for (let a = 0; a < 5; a++) {
+        utilidadOperacion[a] = utilidadBruta[a] - (globalData.gastosOperacion[a]||0) - (globalData.depreciacion[a]||0);
+        html += fmtColor(utilidadOperacion[a]);
+    }
+    html += '</tr>';
+    html += '<tr class="table-row"><td class="px-3 py-2">(-) Gastos Financieros (Intereses)</td>';
+    for (let a = 0; a < 5; a++) html += `<td class="px-3 py-2 text-red-600">${fmt(gastosFinancieros[a])}</td>`;
+    html += '</tr>';
+    const uai = [];
+    html += '<tr class="table-row bg-orange-50"><td class="px-3 py-2 font-bold">UAI (Utilidad Antes de Impuestos)</td>';
+    for (let a = 0; a < 5; a++) {
+        uai[a] = utilidadOperacion[a] - gastosFinancieros[a];
+        html += fmtColor(uai[a]);
+    }
+    html += '</tr>';
+    html += '<tr class="table-row"><td class="px-3 py-2">(-) PTU (10%)</td>';
+    for (let a = 0; a < 5; a++) html += `<td class="px-3 py-2 text-red-600">${fmt(Math.max(0, uai[a] * tasaPTU))}</td>`;
+    html += '</tr>';
+    html += `<tr class="table-row"><td class="px-3 py-2">(-) ISR (${(tasaISR*100).toFixed(0)}%)</td>`;
+    for (let a = 0; a < 5; a++) html += `<td class="px-3 py-2 text-red-600">${fmt(Math.max(0, uai[a] * tasaISR))}</td>`;
+    html += '</tr>';
+    html += '<tr class="table-row bg-green-100"><td class="px-3 py-2 font-bold">UTILIDAD NETA</td>';
+    for (let a = 0; a < 5; a++) {
+        const un = uai[a] - Math.max(0, uai[a]*tasaPTU) - Math.max(0, uai[a]*tasaISR);
+        globalData.utilidadNeta[a] = un;
+        globalData.gastosFinancieros = gastosFinancieros;
+        const color = un >= 0 ? 'text-green-700' : 'text-red-700';
+        html += `<td class="px-3 py-2 font-bold ${color}">${fmt(un)}</td>`;
+    }
+    html += '</tr></tbody></table></div>';
+    const costosFijos = [];
+    const costosVariablesPct = [];
+    for (let a = 0; a < 5; a++) {
+        costosFijos[a] = (globalData.depreciacion[a]||0) + (globalData.gastosOperacion[a]||0) + gastosFinancieros[a];
+        const ventas = globalData.ventasProyeccion[a]||0;
+        costosVariablesPct[a] = ventas > 0 ? (globalData.costoVendido[a]||0)/ventas : 0;
+    }
+    html += '<div class="mt-6 bg-indigo-50 p-4 rounded-lg"><h3 class="font-bold text-indigo-800 mb-3">Punto de Equilibrio</h3>';
+    html += '<div class="overflow-x-auto"><table class="min-w-full text-sm"><thead class="table-header"><tr><th class="px-3 py-2">Concepto</th>';
+    for (let año = 1; año <= 5; año++) { html += `<th class="px-3 py-2">Año ${año}</th>`; }
+    html += '</tr></thead><tbody>';
+    html += '<tr class="table-row"><td class="px-3 py-2">Costos Fijos Totales</td>';
+    for (let a = 0; a < 5; a++) html += `<td class="px-3 py-2">${fmt(costosFijos[a])}</td>`;
+    html += '</tr>';
+    html += '<tr class="table-row bg-yellow-50"><td class="px-3 py-2 font-bold">PE en Pesos</td>';
+    for (let a = 0; a < 5; a++) {
+        const mcPct = 1 - costosVariablesPct[a];
+        const pe = mcPct > 0 ? costosFijos[a]/mcPct : 0;
+        const color = (globalData.ventasProyeccion[a]||0) >= pe ? 'text-green-700' : 'text-red-700';
+        html += `<td class="px-3 py-2 font-bold ${color}">${fmt(pe)}</td>`;
+    }
+    html += '</tr>';
+    html += '<tr class="table-row bg-blue-50"><td class="px-3 py-2 font-bold">Ventas vs PE</td>';
+    for (let a = 0; a < 5; a++) {
+        const mcPct = 1 - costosVariablesPct[a];
+        const pe = mcPct > 0 ? costosFijos[a]/mcPct : 0;
+        const diff = (globalData.ventasProyeccion[a]||0) - pe;
+        const color = diff >= 0 ? 'text-green-700' : 'text-red-700';
+        html += `<td class="px-3 py-2 font-bold ${color}">${diff>=0?"✅":"❌"} ${fmt(diff)}</td>`;
+    }
+    html += '</tr></tbody></table></div></div>';
+    const ventas1=globalData.ventasProyeccion[0]||0, ub1=utilidadBruta[0]||0, gastos1=globalData.gastosOperacion[0]||0, uaii1=utilidadOperacion[0]||0, uai1=uai[0]||0;
+    const un1=uai1-Math.max(0,uai1*tasaPTU)-Math.max(0,uai1*tasaISR);
+    const mB=ventas1>0?(ub1/ventas1)*100:0, mO=ventas1>0?(uaii1/ventas1)*100:0, mN=ventas1>0?(un1/ventas1)*100:0;
+    const mc1=ub1-gastos1, gao=uaii1!==0?mc1/uaii1:0, gaf=uaii1!==0&&uai1!==0?uaii1/uai1:0, gat=gao*gaf;
+    html += '<div class="mt-6 bg-purple-50 p-4 rounded-lg"><h3 class="font-bold text-purple-800 mb-3">Razones Financieras y Grados de Apalancamiento (Año 1)</h3>';
+    html += '<div class="grid grid-cols-2 md:grid-cols-3 gap-3">';
+    const r=(t,v,s,d,c)=>`<div class="bg-white p-3 rounded-lg border shadow-sm text-center"><div class="text-xs text-gray-500 uppercase mb-1">${t}</div><div class="text-xl font-bold ${c}">${v}${s}</div><div class="text-xs text-gray-400 mt-1">${d}</div></div>`;
+    html += r('Margen Bruto',mB.toFixed(1),'%','Util. bruta / Ventas',mB>=30?'text-green-700':'text-red-700');
+    html += r('Margen Operativo',mO.toFixed(1),'%','UAII / Ventas',mO>=10?'text-green-700':'text-red-700');
+    html += r('Margen Neto',mN.toFixed(1),'%','Util. neta / Ventas',mN>=5?'text-green-700':'text-red-700');
+    html += r('GAO',gao.toFixed(2),'x','Apalancamiento Operativo','text-blue-700');
+    html += r('GAF',gaf.toFixed(2),'x','Apalancamiento Financiero','text-purple-700');
+    html += r('GAT',gat.toFixed(2),'x','Apalancamiento Total','text-indigo-700');
+    html += `</div><div class="mt-3 bg-white p-3 rounded border text-xs text-gray-600"><p class="font-bold mb-1">Que significa el Apalancamiento?</p><p>GAO (${gao.toFixed(2)}x): Por cada 1% que suben las ventas, la UAII cambia ${gao.toFixed(2)}%.</p><p>GAF (${gaf.toFixed(2)}x): Por cada 1% que cambia la UAII, la UAI cambia ${gaf.toFixed(2)}%.</p><p>GAT (${gat.toFixed(2)}x): Efecto combinado sobre la utilidad neta.</p></div></div>`;
+    html += '<div class="mt-4 bg-blue-50 p-4 rounded"><h4 class="font-semibold text-blue-800 mb-2">Glosario</h4><div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-gray-600"><p><strong>UAII:</strong> Utilidad Antes de Intereses e Impuestos</p><p><strong>UAI:</strong> Utilidad Antes de Impuestos</p><p><strong>PTU:</strong> Participacion de Trabajadores en Utilidades (10%)</p><p><strong>ISR:</strong> Impuesto Sobre la Renta (sobre UAI)</p><p><strong>PE:</strong> Ventas minimas para no perder dinero</p><p><strong>GAO/GAF/GAT:</strong> Sensibilidad de utilidades ante cambios en ventas</p></div></div>';
+    document.getElementById('estado-resultados').innerHTML = html;
+    calcularEstadoSituacion();
 }
